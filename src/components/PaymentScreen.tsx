@@ -41,7 +41,7 @@ export function PaymentScreen() {
       network: 'base',
       timestamp: new Date(Date.now() - 3600000),
       status: 'completed',
-      txHash: '0x1234...5678'
+      txHash: '0x1234...5678',
     },
     {
       id: '2',
@@ -52,7 +52,7 @@ export function PaymentScreen() {
       network: 'polygon',
       timestamp: new Date(Date.now() - 7200000),
       status: 'completed',
-      txHash: '0xabcd...efgh'
+      txHash: '0xabcd...efgh',
     },
     {
       id: '3',
@@ -63,15 +63,15 @@ export function PaymentScreen() {
       network: 'ethereum',
       timestamp: new Date(Date.now() - 86400000),
       status: 'pending',
-      txHash: '0x9876...5432'
-    }
+      txHash: '0x9876...5432',
+    },
   ]);
 
   const handlePayment = async () => {
     setIsProcessing(true);
     // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     // Add new transaction to history
     const newTransaction: Transaction = {
       id: Date.now().toString(),
@@ -82,13 +82,13 @@ export function PaymentScreen() {
       network: paymentMethod === 'Stripe' ? 'stripe' : network,
       timestamp: new Date(),
       status: 'completed',
-      txHash: '0x' + Math.random().toString(16).substring(2, 10)
+      txHash: '0x' + Math.random().toString(16).substring(2, 10),
     };
-    
+
     setTransactions([newTransaction, ...transactions]);
     setIsProcessing(false);
     setIsSuccess(true);
-    
+
     // Reset after showing success
     setTimeout(() => {
       setIsSuccess(false);
@@ -112,13 +112,13 @@ export function PaymentScreen() {
       network: network,
       timestamp: new Date(),
       status: 'completed',
-      txHash: '0x' + Math.random().toString(16).substring(2, 10)
+      txHash: '0x' + Math.random().toString(16).substring(2, 10),
     };
-    
+
     setTransactions([newTransaction, ...transactions]);
     setShowQRPayment(false);
     setIsSuccess(true);
-    
+
     // Reset after showing success
     setTimeout(() => {
       setIsSuccess(false);
@@ -195,9 +195,7 @@ export function PaymentScreen() {
 
             {paymentMethod === 'Stripe' && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
-                <label className="block mb-3 text-gray-700">
-                  Email Address
-                </label>
+                <label className="block mb-3 text-gray-700">Email Address</label>
                 <input
                   type="email"
                   value={recipient}
@@ -214,7 +212,9 @@ export function PaymentScreen() {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Amount</span>
-                  <span>{amount} {paymentMethod}</span>
+                  <span>
+                    {amount} {paymentMethod}
+                  </span>
                 </div>
                 {paymentMethod !== 'Stripe' && (
                   <div className="flex justify-between text-sm">
@@ -232,10 +232,9 @@ export function PaymentScreen() {
                   <div className="flex justify-between">
                     <span className="text-gray-900">Total</span>
                     <span>
-                      {paymentMethod === 'Stripe' 
-                        ? `$${(parseFloat(amount) * 1.029 + 0.30).toFixed(2)}`
-                        : `${amount} ${paymentMethod}`
-                      }
+                      {paymentMethod === 'Stripe'
+                        ? `$${(parseFloat(amount) * 1.029 + 0.3).toFixed(2)}`
+                        : `${amount} ${paymentMethod}`}
                     </span>
                   </div>
                 </div>
@@ -245,11 +244,7 @@ export function PaymentScreen() {
 
           {/* Right Side - Amount Input with Keypad */}
           <div>
-            <AmountInput
-              amount={amount}
-              onAmountChange={setAmount}
-              currency={paymentMethod}
-            />
+            <AmountInput amount={amount} onAmountChange={setAmount} currency={paymentMethod} />
 
             {/* Payment Buttons */}
             <div className="space-y-3 mt-6">

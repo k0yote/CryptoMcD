@@ -35,10 +35,7 @@ export function ShoppingCart({
   return (
     <>
       {/* Overlay */}
-      <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onClose} />
 
       {/* Cart Sidebar */}
       <div className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 flex flex-col">
@@ -51,10 +48,7 @@ export function ShoppingCart({
               {itemCount}
             </span>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="w-6 h-6 text-gray-500" />
           </button>
         </div>
@@ -72,12 +66,9 @@ export function ShoppingCart({
           ) : (
             <div className="space-y-4">
               {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-gray-50 rounded-xl p-4 flex items-center gap-4"
-                >
+                <div key={item.id} className="bg-gray-50 rounded-xl p-4 flex items-center gap-4">
                   <div className="text-4xl">{item.image}</div>
-                  
+
                   <div className="flex-1 min-w-0">
                     <h4 className="text-gray-900 mb-1">{item.name}</h4>
                     <p className="text-red-600">${item.price.toFixed(2)}</p>

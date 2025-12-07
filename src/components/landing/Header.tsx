@@ -8,7 +8,12 @@ interface HeaderProps {
   onOrdersClick?: () => void;
 }
 
-export function Header({ cartCount = 0, onCartClick, onLocationClick, onOrdersClick }: HeaderProps) {
+export function Header({
+  cartCount = 0,
+  onCartClick,
+  onLocationClick,
+  onOrdersClick,
+}: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
@@ -47,9 +52,7 @@ export function Header({ cartCount = 0, onCartClick, onLocationClick, onOrdersCl
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-4">
-            <button className="text-gray-600 hover:text-gray-900 transition-colors">
-              Sign In
-            </button>
+            <button className="text-gray-600 hover:text-gray-900 transition-colors">Sign In</button>
             <button
               onClick={onCartClick}
               className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors flex items-center gap-2 relative"

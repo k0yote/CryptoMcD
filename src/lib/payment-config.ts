@@ -5,7 +5,8 @@
 
 // Store wallet address - receives all payments
 // This should be set via environment variable in production
-export const STORE_ADDRESS = import.meta.env.VITE_STORE_ADDRESS || '0x0000000000000000000000000000000000000000';
+export const STORE_ADDRESS =
+  import.meta.env.VITE_STORE_ADDRESS || '0x0000000000000000000000000000000000000000';
 
 // Supported networks
 export const SUPPORTED_NETWORKS = {
@@ -141,14 +142,14 @@ export function isTokenAvailable(token: TokenSymbol, network: NetworkId): boolea
 
 // Get available tokens for a network
 export function getAvailableTokens(network: NetworkId): TokenSymbol[] {
-  return (Object.keys(SUPPORTED_TOKENS) as TokenSymbol[]).filter(token =>
+  return (Object.keys(SUPPORTED_TOKENS) as TokenSymbol[]).filter((token) =>
     isTokenAvailable(token, network)
   );
 }
 
 // Get available networks for a token
 export function getAvailableNetworks(token: TokenSymbol): NetworkId[] {
-  return (Object.keys(SUPPORTED_NETWORKS) as NetworkId[]).filter(network =>
+  return (Object.keys(SUPPORTED_NETWORKS) as NetworkId[]).filter((network) =>
     isTokenAvailable(token, network)
   );
 }

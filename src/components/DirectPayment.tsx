@@ -20,7 +20,14 @@ interface DirectPaymentProps {
   onCancel: () => void;
 }
 
-type PaymentStatus = 'idle' | 'checking' | 'confirming' | 'sending' | 'waiting' | 'success' | 'error';
+type PaymentStatus =
+  | 'idle'
+  | 'checking'
+  | 'confirming'
+  | 'sending'
+  | 'waiting'
+  | 'success'
+  | 'error';
 
 export function DirectPayment({ request, onSuccess, onCancel }: DirectPaymentProps) {
   const { t } = useTranslation();
@@ -57,7 +64,8 @@ export function DirectPayment({ request, onSuccess, onCancel }: DirectPaymentPro
     checkBalance();
   }, [address, request.token, request.network]);
 
-  const hasSufficientBalance = balance !== null && parseFloat(balance) >= parseFloat(request.amount);
+  const hasSufficientBalance =
+    balance !== null && parseFloat(balance) >= parseFloat(request.amount);
 
   const handleSwitchNetwork = async () => {
     try {
@@ -179,22 +187,32 @@ export function DirectPayment({ request, onSuccess, onCancel }: DirectPaymentPro
           <Loader2 className="w-4 h-4 animate-spin" />
           <span className="text-sm">{t('payment.checkingBalance')}</span>
         </div>
-      ) : balance !== null && (
-        <div className={`rounded-lg p-3 mb-6 ${
-          hasSufficientBalance ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-        }`}>
-          <div className="flex items-center justify-between">
-            <span className={`text-sm ${hasSufficientBalance ? 'text-green-700' : 'text-red-700'}`}>
-              {t('payment.yourBalance')}
-            </span>
-            <span className={`font-medium ${hasSufficientBalance ? 'text-green-800' : 'text-red-800'}`}>
-              {formatTokenAmount(balance, request.token)}
-            </span>
+      ) : (
+        balance !== null && (
+          <div
+            className={`rounded-lg p-3 mb-6 ${
+              hasSufficientBalance
+                ? 'bg-green-50 border border-green-200'
+                : 'bg-red-50 border border-red-200'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span
+                className={`text-sm ${hasSufficientBalance ? 'text-green-700' : 'text-red-700'}`}
+              >
+                {t('payment.yourBalance')}
+              </span>
+              <span
+                className={`font-medium ${hasSufficientBalance ? 'text-green-800' : 'text-red-800'}`}
+              >
+                {formatTokenAmount(balance, request.token)}
+              </span>
+            </div>
+            {!hasSufficientBalance && (
+              <p className="text-xs text-red-600 mt-1">{t('payment.insufficientBalance')}</p>
+            )}
           </div>
-          {!hasSufficientBalance && (
-            <p className="text-xs text-red-600 mt-1">{t('payment.insufficientBalance')}</p>
-          )}
-        </div>
+        )
       )}
 
       {/* Error Message */}

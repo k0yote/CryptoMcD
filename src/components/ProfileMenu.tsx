@@ -76,9 +76,7 @@ export function ProfileMenu({
             <div className="flex items-center gap-3">
               <WalletAvatar address={address} size={48} />
               <div className="flex-1 min-w-0">
-                {username && (
-                  <p className="font-medium text-gray-900 truncate">{username}</p>
-                )}
+                {username && <p className="font-medium text-gray-900 truncate">{username}</p>}
                 <div className="flex items-center gap-1">
                   <p className="text-sm text-gray-500 font-mono">{truncateAddress(address)}</p>
                   <button
@@ -94,7 +92,9 @@ export function ProfileMenu({
                   </button>
                 </div>
                 <span className="inline-block mt-1 text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
-                  {loginMethod === 'passkey-wallet' ? t('profile.passkeyWallet') : t('profile.externalWallet')}
+                  {loginMethod === 'passkey-wallet'
+                    ? t('profile.passkeyWallet')
+                    : t('profile.externalWallet')}
                 </span>
               </div>
             </div>

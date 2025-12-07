@@ -14,7 +14,8 @@ const products: Product[] = [
   {
     id: '1',
     name: 'Big Mac',
-    description: 'Two all-beef patties, special sauce, lettuce, cheese, pickles, onions on a sesame seed bun',
+    description:
+      'Two all-beef patties, special sauce, lettuce, cheese, pickles, onions on a sesame seed bun',
     price: 5.99,
     image: '🍔',
     category: 'Burgers',
@@ -22,7 +23,8 @@ const products: Product[] = [
   {
     id: '2',
     name: 'Quarter Pounder',
-    description: 'Quarter pound of 100% fresh beef, topped with tangy pickles, onions, ketchup and mustard',
+    description:
+      'Quarter pound of 100% fresh beef, topped with tangy pickles, onions, ketchup and mustard',
     price: 6.49,
     image: '🍔',
     category: 'Burgers',
@@ -78,7 +80,7 @@ const products: Product[] = [
   {
     id: '9',
     name: 'McFlurry',
-    description: 'Creamy soft serve with M&M\'s or Oreo',
+    description: "Creamy soft serve with M&M's or Oreo",
     price: 3.49,
     image: '🍦',
     category: 'Desserts',
@@ -95,9 +97,8 @@ interface ProductsSectionProps {
 export function ProductsSection({ onAddToCart, cart }: ProductsSectionProps) {
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const filteredProducts = selectedCategory === 'All'
-    ? products
-    : products.filter(p => p.category === selectedCategory);
+  const filteredProducts =
+    selectedCategory === 'All' ? products : products.filter((p) => p.category === selectedCategory);
 
   return (
     <section id="products" className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
@@ -143,12 +144,12 @@ export function ProductsSection({ onAddToCart, cart }: ProductsSectionProps) {
                     ${product.price}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                  {product.description}
-                </p>
+                <p className="text-sm text-gray-600 mb-4 line-clamp-2">{product.description}</p>
 
                 <button
-                  onClick={() => onAddToCart(product.id, product.name, product.price, product.image)}
+                  onClick={() =>
+                    onAddToCart(product.id, product.name, product.price, product.image)
+                  }
                   className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl flex items-center justify-center gap-2 transition-colors"
                 >
                   <Plus className="w-5 h-5" />

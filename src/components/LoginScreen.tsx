@@ -107,9 +107,7 @@ export function LoginScreen({ onSuccess }: LoginScreenProps) {
           {mode === 'login' ? 'パスキーでログイン' : 'パスキーを登録'}
         </h2>
         <p className="text-gray-600">
-          {mode === 'login'
-            ? '生体認証またはセキュリティキーを使用'
-            : '新しいパスキーを作成します'}
+          {mode === 'login' ? '生体認証またはセキュリティキーを使用' : '新しいパスキーを作成します'}
         </p>
       </div>
 
@@ -117,17 +115,19 @@ export function LoginScreen({ onSuccess }: LoginScreenProps) {
       {!passkeyAvailable && (
         <div className="mb-6 p-4 rounded-lg bg-yellow-50 text-yellow-800 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-          <span>このデバイスでは生体認証が利用できません。外部セキュリティキーをお使いください。</span>
+          <span>
+            このデバイスでは生体認証が利用できません。外部セキュリティキーをお使いください。
+          </span>
         </div>
       )}
 
       {/* Message */}
       {message && (
-        <div className={`mb-6 p-4 rounded-lg flex items-start gap-3 ${
-          message.type === 'success'
-            ? 'bg-green-50 text-green-800'
-            : 'bg-red-50 text-red-800'
-        }`}>
+        <div
+          className={`mb-6 p-4 rounded-lg flex items-start gap-3 ${
+            message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+          }`}
+        >
           {message.type === 'success' ? (
             <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
           ) : (

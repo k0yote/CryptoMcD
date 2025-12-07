@@ -1,15 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, CreditCard, CheckCircle2, QrCode, Wallet, Loader2 } from 'lucide-react';
 import { useAccount, useSwitchChain, useChainId } from 'wagmi';
 import { PaymentQRCode } from './PaymentQRCode';
 import { DirectPayment } from './DirectPayment';
 import { StripeCheckout } from './StripeCheckout';
-import {
-  createPaymentRequest,
-  usdToTokenAmount,
-  type PaymentRequest,
-} from '@/lib/payment';
+import { createPaymentRequest, usdToTokenAmount, type PaymentRequest } from '@/lib/payment';
 import {
   SUPPORTED_NETWORKS,
   SUPPORTED_TOKENS,
@@ -39,7 +35,7 @@ type Step = 'payment-method' | 'payment-flow' | 'qr' | 'direct' | 'stripe' | 'su
 
 export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheckoutProps) {
   const { t } = useTranslation();
-  const { address, isConnected } = useAccount();
+  const { isConnected } = useAccount();
   const chainId = useChainId();
   const { switchChain, isPending: isSwitchingChain } = useSwitchChain();
 
@@ -47,12 +43,13 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(null);
   const [network, setNetwork] = useState<NetworkId | null>(null);
   const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
-  const [txHash, setTxHash] = useState<string | null>(null);
+  const [_txHash, setTxHash] = useState<string | null>(null);
 
   // Get available networks for the selected token
-  const availableNetworks = paymentMethod && paymentMethod !== 'Stripe'
-    ? getAvailableNetworks(paymentMethod)
-    : [];
+  const availableNetworks = useMemo(
+    () => (paymentMethod && paymentMethod !== 'Stripe' ? getAvailableNetworks(paymentMethod) : []),
+    [paymentMethod]
+  );
 
   // Auto-select first available network when token changes
   useEffect(() => {
@@ -62,7 +59,7 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
         setNetwork(availableNetworks[0]);
       }
     }
-  }, [paymentMethod, availableNetworks]);
+  }, [paymentMethod, availableNetworks, network]);
 
   const handlePaymentMethodSelect = (method: PaymentMethod) => {
     setPaymentMethod(method);
@@ -107,7 +104,7 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
       tokenAmount,
       paymentMethod,
       network,
-      `Order: ${items.map(i => `${i.name} x${i.quantity}`).join(', ')}`
+      `Order: ${items.map((i) => `${i.name} x${i.quantity}`).join(', ')}`
     );
     setPaymentRequest(request);
 
@@ -134,12 +131,17 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-2xl mx-auto p-4 md:p-8">
-          <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
+          >
             <ArrowLeft className="w-5 h-5" />
             {t('common.back')}
           </button>
 
-          <h1 className="text-2xl font-bold mb-2 text-gray-900">{t('checkout.selectPaymentMethod')}</h1>
+          <h1 className="text-2xl font-bold mb-2 text-gray-900">
+            {t('checkout.selectPaymentMethod')}
+          </h1>
           <p className="text-gray-600 mb-8">{t('checkout.choosePayment')}</p>
 
           {/* Crypto Options */}
@@ -174,51 +176,56 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
             </div>
 
             {/* Network Selection - Show only available networks for selected token */}
-            {(paymentMethod === 'USDC' || paymentMethod === 'JPYC') && availableNetworks.length > 0 && (
-              <div className="bg-white rounded-xl p-6 mb-6 border-2 border-indigo-200">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-gray-900">{t('checkout.selectNetwork')}</h4>
-                  {isSwitchingChain && (
-                    <div className="flex items-center gap-2 text-sm text-indigo-600">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>{t('payment.switchingNetwork')}</span>
-                    </div>
-                  )}
+            {(paymentMethod === 'USDC' || paymentMethod === 'JPYC') &&
+              availableNetworks.length > 0 && (
+                <div className="bg-white rounded-xl p-6 mb-6 border-2 border-indigo-200">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-medium text-gray-900">
+                      {t('checkout.selectNetwork')}
+                    </h4>
+                    {isSwitchingChain && (
+                      <div className="flex items-center gap-2 text-sm text-indigo-600">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>{t('payment.switchingNetwork')}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {availableNetworks.map((net) => {
+                      const netInfo = SUPPORTED_NETWORKS[net];
+                      const isCurrentChain = chainId === netInfo.chainId;
+                      return (
+                        <button
+                          key={net}
+                          onClick={() => handleNetworkSelect(net)}
+                          disabled={isSwitchingChain}
+                          className={`p-4 rounded-lg border-2 transition-all flex items-center gap-3 ${
+                            network === net
+                              ? 'border-indigo-500 bg-indigo-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          } ${isSwitchingChain ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: netInfo.color }}
+                          />
+                          <span className="text-sm text-gray-900 flex-1">{netInfo.name}</span>
+                          {isCurrentChain && isConnected && (
+                            <span className="text-xs text-green-600">✓</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {availableNetworks.map((net) => {
-                    const netInfo = SUPPORTED_NETWORKS[net];
-                    const isCurrentChain = chainId === netInfo.chainId;
-                    return (
-                      <button
-                        key={net}
-                        onClick={() => handleNetworkSelect(net)}
-                        disabled={isSwitchingChain}
-                        className={`p-4 rounded-lg border-2 transition-all flex items-center gap-3 ${
-                          network === net
-                            ? 'border-indigo-500 bg-indigo-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        } ${isSwitchingChain ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: netInfo.color }}
-                        />
-                        <span className="text-sm text-gray-900 flex-1">{netInfo.name}</span>
-                        {isCurrentChain && isConnected && (
-                          <span className="text-xs text-green-600">✓</span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+              )}
           </div>
 
           {/* Card Option */}
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-4">{t('checkout.traditionalPayment')}</h3>
+            <h3 className="text-sm font-medium text-gray-700 mb-4">
+              {t('checkout.traditionalPayment')}
+            </h3>
             <button
               onClick={() => handlePaymentMethodSelect('Stripe')}
               className={`w-full bg-white border-2 rounded-xl p-6 text-left transition-all ${
@@ -247,7 +254,9 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
                 <div key={item.id} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{item.image}</span>
-                    <span className="text-gray-700">{item.name} x{item.quantity}</span>
+                    <span className="text-gray-700">
+                      {item.name} x{item.quantity}
+                    </span>
                   </div>
                   <span className="text-gray-900">${(item.price * item.quantity).toFixed(2)}</span>
                 </div>
@@ -260,7 +269,9 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
               </div>
               {paymentMethod && paymentMethod !== 'Stripe' && (
                 <div className="flex justify-between mt-2 text-sm text-gray-500">
-                  <span>≈ {usdToTokenAmount(total, paymentMethod)} {paymentMethod}</span>
+                  <span>
+                    ≈ {usdToTokenAmount(total, paymentMethod)} {paymentMethod}
+                  </span>
                 </div>
               )}
             </div>
@@ -278,7 +289,10 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
                     {t('payment.switchingNetwork')}
                   </>
                 ) : (
-                  t('checkout.payWithCrypto', { amount: `$${total.toFixed(2)}`, currency: paymentMethod })
+                  t('checkout.payWithCrypto', {
+                    amount: `$${total.toFixed(2)}`,
+                    currency: paymentMethod,
+                  })
                 )}
               </button>
             )}
@@ -293,14 +307,20 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-2xl mx-auto p-4 md:p-8">
-          <button onClick={() => setStep('payment-method')} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6">
+          <button
+            onClick={() => setStep('payment-method')}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
+          >
             <ArrowLeft className="w-5 h-5" />
             {t('common.back')}
           </button>
 
-          <h1 className="text-2xl font-bold mb-2 text-gray-900">{t('payment.selectPaymentFlow')}</h1>
+          <h1 className="text-2xl font-bold mb-2 text-gray-900">
+            {t('payment.selectPaymentFlow')}
+          </h1>
           <p className="text-gray-600 mb-8">
-            {t('common.total')}: ${total.toFixed(2)} ({usdToTokenAmount(total, paymentMethod!)} {paymentMethod})
+            {t('common.total')}: ${total.toFixed(2)} ({usdToTokenAmount(total, paymentMethod!)}{' '}
+            {paymentMethod})
           </p>
 
           <div className="space-y-4">
@@ -357,7 +377,10 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-md mx-auto p-4 md:p-8">
-          <button onClick={() => setStep('payment-flow')} className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6">
+          <button
+            onClick={() => setStep('payment-flow')}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
+          >
             <ArrowLeft className="w-5 h-5" />
             {t('common.back')}
           </button>
@@ -381,7 +404,7 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
   if (step === 'stripe') {
     return (
       <StripeCheckout
-        items={items.map(item => ({
+        items={items.map((item) => ({
           id: item.id,
           name: item.name,
           price: item.price,
@@ -404,7 +427,9 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-12 h-12 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold mb-2 text-gray-900">{t('checkout.paymentSuccessful')}</h2>
+          <h2 className="text-2xl font-bold mb-2 text-gray-900">
+            {t('checkout.paymentSuccessful')}
+          </h2>
           <p className="text-gray-600 mb-8">{t('checkout.orderConfirmed')}</p>
 
           <div className="bg-gray-50 rounded-xl p-4 mb-6">

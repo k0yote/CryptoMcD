@@ -55,11 +55,11 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
             key={tx.id}
             className="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors cursor-pointer"
           >
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-              tx.type === 'send' 
-                ? 'bg-orange-100 text-orange-600' 
-                : 'bg-green-100 text-green-600'
-            }`}>
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                tx.type === 'send' ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'
+              }`}
+            >
               {tx.type === 'send' ? (
                 <ArrowUpRight className="w-5 h-5" />
               ) : (
@@ -73,11 +73,15 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                 <span className="px-2 py-0.5 bg-gray-200 text-gray-700 text-xs rounded-full capitalize">
                   {tx.network}
                 </span>
-                <span className={`px-2 py-0.5 text-xs rounded-full ${
-                  tx.status === 'completed' ? 'bg-green-100 text-green-700' :
-                  tx.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-red-100 text-red-700'
-                }`}>
+                <span
+                  className={`px-2 py-0.5 text-xs rounded-full ${
+                    tx.status === 'completed'
+                      ? 'bg-green-100 text-green-700'
+                      : tx.status === 'pending'
+                        ? 'bg-yellow-100 text-yellow-700'
+                        : 'bg-red-100 text-red-700'
+                  }`}
+                >
                   {tx.status}
                 </span>
               </div>
@@ -89,10 +93,9 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
             </div>
 
             <div className="text-right">
-              <div className={`mb-1 ${
-                tx.type === 'send' ? 'text-gray-900' : 'text-green-600'
-              }`}>
-                {tx.type === 'send' ? '-' : '+'}{tx.amount} {tx.currency}
+              <div className={`mb-1 ${tx.type === 'send' ? 'text-gray-900' : 'text-green-600'}`}>
+                {tx.type === 'send' ? '-' : '+'}
+                {tx.amount} {tx.currency}
               </div>
               <button
                 onClick={() => window.open(`https://etherscan.io/tx/${tx.txHash}`, '_blank')}

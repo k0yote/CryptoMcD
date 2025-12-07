@@ -10,7 +10,14 @@ interface QRPaymentProps {
   onSuccess: () => void;
 }
 
-export function QRPayment({ amount, currency, network, recipient, onClose, onSuccess }: QRPaymentProps) {
+export function QRPayment({
+  amount,
+  currency,
+  network,
+  recipient,
+  onClose,
+  onSuccess,
+}: QRPaymentProps) {
   const [copied, setCopied] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(600); // 10 minutes
@@ -65,9 +72,7 @@ export function QRPayment({ amount, currency, network, recipient, onClose, onSuc
             <CheckCircle2 className="w-12 h-12 text-green-600" />
           </div>
           <h2 className="mb-2 text-gray-900">Payment Successful!</h2>
-          <p className="text-gray-600 mb-6">
-            Your payment has been confirmed on the blockchain
-          </p>
+          <p className="text-gray-600 mb-6">Your payment has been confirmed on the blockchain</p>
           <button
             onClick={onClose}
             className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl transition-colors"
@@ -84,10 +89,7 @@ export function QRPayment({ amount, currency, network, recipient, onClose, onSuc
       <div className="bg-white rounded-2xl max-w-md w-full p-6">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-gray-900">Scan to Pay</h3>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
@@ -106,9 +108,7 @@ export function QRPayment({ amount, currency, network, recipient, onClose, onSuc
               {Array.from({ length: 64 }).map((_, i) => (
                 <div
                   key={i}
-                  className={`w-3 h-3 ${
-                    Math.random() > 0.5 ? 'bg-white' : 'bg-gray-900'
-                  }`}
+                  className={`w-3 h-3 ${Math.random() > 0.5 ? 'bg-white' : 'bg-gray-900'}`}
                 />
               ))}
             </div>
@@ -120,7 +120,9 @@ export function QRPayment({ amount, currency, network, recipient, onClose, onSuc
           <div className="bg-gray-50 rounded-xl p-4">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600">Amount</span>
-              <span className="text-gray-900">{amount} {currency}</span>
+              <span className="text-gray-900">
+                {amount} {currency}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Network</span>
@@ -154,7 +156,9 @@ export function QRPayment({ amount, currency, network, recipient, onClose, onSuc
           <ol className="text-sm text-indigo-800 space-y-1 list-decimal list-inside">
             <li>Open your crypto wallet app</li>
             <li>Scan this QR code or copy the address</li>
-            <li>Send exactly {amount} {currency}</li>
+            <li>
+              Send exactly {amount} {currency}
+            </li>
             <li>Wait for confirmation</li>
           </ol>
         </div>

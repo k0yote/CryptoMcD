@@ -38,9 +38,7 @@ export function NetworksSection() {
     <section id="networks" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="mb-4 text-gray-900">
-            Multi-Chain & Multi-Currency
-          </h2>
+          <h2 className="mb-4 text-gray-900">Multi-Chain & Multi-Currency</h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Choose from multiple blockchain networks and stablecoins for maximum flexibility
           </p>
@@ -57,9 +55,9 @@ export function NetworksSection() {
                 <div className={`w-3 h-3 ${network.color} rounded-full`}></div>
                 <h3 className="text-gray-900">{network.name}</h3>
               </div>
-              
+
               <p className="text-sm text-gray-600 mb-4">{network.description}</p>
-              
+
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Avg. Fee</span>
@@ -78,9 +76,7 @@ export function NetworksSection() {
         <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-3xl p-8 md:p-12">
           <div className="text-center mb-8">
             <h3 className="mb-2 text-gray-900">Supported Stablecoins</h3>
-            <p className="text-gray-600">
-              Accept payments in your preferred stable currency
-            </p>
+            <p className="text-gray-600">Accept payments in your preferred stable currency</p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-4">

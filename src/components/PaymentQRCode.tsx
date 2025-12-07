@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { QRCodeSVG } from 'qrcode.react';
-import { X, Copy, Check, ExternalLink, Loader2 } from 'lucide-react';
+import { X, Copy, Check, Loader2 } from 'lucide-react';
 import {
   type PaymentRequest,
   encodePaymentRequestToQR,
   getPaymentRequestRemainingTime,
   isPaymentRequestValid,
-  getTransactionUrl,
   formatTokenAmount,
 } from '@/lib/payment';
 import { SUPPORTED_NETWORKS, SUPPORTED_TOKENS } from '@/lib/payment-config';
@@ -18,7 +17,11 @@ interface PaymentQRCodeProps {
   onPaymentDetected?: (txHash: string) => void;
 }
 
-export function PaymentQRCode({ request, onClose, onPaymentDetected }: PaymentQRCodeProps) {
+export function PaymentQRCode({
+  request,
+  onClose,
+  onPaymentDetected: _onPaymentDetected,
+}: PaymentQRCodeProps) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [remainingTime, setRemainingTime] = useState(getPaymentRequestRemainingTime(request));
@@ -84,21 +87,23 @@ export function PaymentQRCode({ request, onClose, onPaymentDetected }: PaymentQR
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
           <h3 className="text-lg font-semibold text-gray-900">{t('payment.scanToPay')}</h3>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
 
         <div className="p-6">
           {/* Timer */}
-          <div className={`rounded-lg p-3 mb-6 text-center ${
-            remainingTime < 60 ? 'bg-red-50 border border-red-200' : 'bg-yellow-50 border border-yellow-200'
-          }`}>
+          <div
+            className={`rounded-lg p-3 mb-6 text-center ${
+              remainingTime < 60
+                ? 'bg-red-50 border border-red-200'
+                : 'bg-yellow-50 border border-yellow-200'
+            }`}
+          >
             <p className={`text-sm ${remainingTime < 60 ? 'text-red-800' : 'text-yellow-800'}`}>
-              {t('payment.expiresIn')} <span className="font-mono font-semibold">{formatTime(remainingTime)}</span>
+              {t('payment.expiresIn')}{' '}
+              <span className="font-mono font-semibold">{formatTime(remainingTime)}</span>
             </p>
           </div>
 
@@ -135,10 +140,7 @@ export function PaymentQRCode({ request, onClose, onPaymentDetected }: PaymentQR
             <div className="flex items-center justify-between px-4">
               <span className="text-sm text-gray-600">{t('payment.network')}</span>
               <div className="flex items-center gap-2">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: network.color }}
-                />
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: network.color }} />
                 <span className="text-gray-900">{network.name}</span>
               </div>
             </div>

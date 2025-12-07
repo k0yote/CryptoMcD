@@ -9,13 +9,11 @@ export function CTASection() {
           <span className="text-sm">Special Offer - 10% Off First Order</span>
         </div>
 
-        <h2 className="mb-6 text-white">
-          Ready to Order?
-        </h2>
-        
+        <h2 className="mb-6 text-white">Ready to Order?</h2>
+
         <p className="text-xl text-white/90 mb-8">
-          Join thousands of customers enjoying fast food with even faster crypto payments.
-          No wallet? No problem - just scan and pay!
+          Join thousands of customers enjoying fast food with even faster crypto payments. No
+          wallet? No problem - just scan and pay!
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -28,9 +26,7 @@ export function CTASection() {
           </button>
         </div>
 
-        <p className="text-sm text-white/80 mt-6">
-          Free delivery on orders over $15
-        </p>
+        <p className="text-sm text-white/80 mt-6">Free delivery on orders over $15</p>
       </div>
     </section>
   );

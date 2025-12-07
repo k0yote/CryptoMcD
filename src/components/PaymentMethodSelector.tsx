@@ -33,9 +33,7 @@ export function PaymentMethodSelector({
     <div className="bg-white rounded-2xl shadow-lg p-6">
       {/* Payment Method */}
       <div className="mb-6">
-        <label className="block mb-3 text-gray-700">
-          Payment Method
-        </label>
+        <label className="block mb-3 text-gray-700">Payment Method</label>
         <div className="grid grid-cols-3 gap-3">
           {paymentMethods.map((method) => {
             const Icon = method.icon;
@@ -67,9 +65,7 @@ export function PaymentMethodSelector({
       {/* Network Selection - Only show for crypto payments */}
       {paymentMethod !== 'Stripe' && (
         <div>
-          <label className="block mb-3 text-gray-700">
-            Network
-          </label>
+          <label className="block mb-3 text-gray-700">Network</label>
           <div className="grid grid-cols-2 gap-3">
             {networks.map((net) => {
               const isSelected = network === net.value;

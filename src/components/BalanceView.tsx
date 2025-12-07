@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, RefreshCw, TrendingUp, AlertCircle } from 'lucide-react';
 import { WalletAvatar } from './WalletAvatar';
@@ -46,7 +46,7 @@ export function BalanceView({ address, username, onBack }: BalanceViewProps) {
 
   const networkConfig = SUPPORTED_NETWORKS[selectedNetwork];
 
-  const fetchBalances = async () => {
+  const fetchBalances = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -129,11 +129,11 @@ export function BalanceView({ address, username, onBack }: BalanceViewProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [address, selectedNetwork, networkConfig, t]);
 
   useEffect(() => {
     fetchBalances();
-  }, [address, selectedNetwork]);
+  }, [fetchBalances]);
 
   const truncateAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -152,10 +152,7 @@ export function BalanceView({ address, username, onBack }: BalanceViewProps) {
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <button
-              onClick={onBack}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
+            <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
             <h1 className="text-xl font-semibold text-gray-900">{t('balance.title')}</h1>
@@ -217,8 +214,11 @@ export function BalanceView({ address, username, onBack }: BalanceViewProps) {
               className="w-12 h-12 rounded-full flex items-center justify-center text-2xl"
               style={{ backgroundColor: `${networkConfig.color}20` }}
             >
-              {networkConfig.nativeCurrency.symbol === 'ETH' ? '⟠' :
-               networkConfig.nativeCurrency.symbol === 'AVAX' ? '🔺' : '🟣'}
+              {networkConfig.nativeCurrency.symbol === 'ETH'
+                ? '⟠'
+                : networkConfig.nativeCurrency.symbol === 'AVAX'
+                  ? '🔺'
+                  : '🟣'}
             </div>
             <div className="flex-1">
               <p className="font-medium text-gray-900">{networkConfig.nativeCurrency.name}</p>

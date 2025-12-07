@@ -70,7 +70,9 @@ export function hasRegisteredPasskey(): boolean {
   return getStoredCredentials().length > 0;
 }
 
-export async function registerPasskey(username: string): Promise<{ success: boolean; error?: string }> {
+export async function registerPasskey(
+  username: string
+): Promise<{ success: boolean; error?: string }> {
   if (!isPasskeySupported()) {
     return { success: false, error: 'お使いのブラウザはパスキーをサポートしていません' };
   }
@@ -91,7 +93,7 @@ export async function registerPasskey(username: string): Promise<{ success: bool
         displayName: username,
       },
       pubKeyCredParams: [
-        { alg: -7, type: 'public-key' },   // ES256
+        { alg: -7, type: 'public-key' }, // ES256
         { alg: -257, type: 'public-key' }, // RS256
       ],
       authenticatorSelection: {
@@ -103,9 +105,9 @@ export async function registerPasskey(username: string): Promise<{ success: bool
       attestation: 'none',
     };
 
-    const credential = await navigator.credentials.create({
+    const credential = (await navigator.credentials.create({
       publicKey: publicKeyCredentialCreationOptions,
-    }) as PublicKeyCredential;
+    })) as PublicKeyCredential;
 
     if (!credential) {
       return { success: false, error: 'パスキーの作成がキャンセルされました' };
@@ -141,7 +143,11 @@ export async function registerPasskey(username: string): Promise<{ success: bool
   }
 }
 
-export async function authenticateWithPasskey(): Promise<{ success: boolean; username?: string; error?: string }> {
+export async function authenticateWithPasskey(): Promise<{
+  success: boolean;
+  username?: string;
+  error?: string;
+}> {
   if (!isPasskeySupported()) {
     return { success: false, error: 'お使いのブラウザはパスキーをサポートしていません' };
   }
@@ -158,33 +164,32 @@ export async function authenticateWithPasskey(): Promise<{ success: boolean; use
       userVerification: 'required',
       // If we have stored credentials, allow only those
       // Otherwise, allow any discoverable credential
-      allowCredentials: storedCredentials.length > 0
-        ? storedCredentials.map(cred => ({
-            id: base64ToArrayBuffer(cred.rawId),
-            type: 'public-key' as const,
-            transports: ['internal' as const],
-          }))
-        : undefined,
+      allowCredentials:
+        storedCredentials.length > 0
+          ? storedCredentials.map((cred) => ({
+              id: base64ToArrayBuffer(cred.rawId),
+              type: 'public-key' as const,
+              transports: ['internal' as const],
+            }))
+          : undefined,
     };
 
-    const credential = await navigator.credentials.get({
+    const credential = (await navigator.credentials.get({
       publicKey: publicKeyCredentialRequestOptions,
-    }) as PublicKeyCredential;
+    })) as PublicKeyCredential;
 
     if (!credential) {
       return { success: false, error: '認証がキャンセルされました' };
     }
 
     // Find the matching stored credential
-    const matchedCredential = storedCredentials.find(
-      cred => cred.id === credential.id
-    );
+    const matchedCredential = storedCredentials.find((cred) => cred.id === credential.id);
 
     // In a real app, you would verify the signature on the server
     // For this demo, we just check if the credential exists
     return {
       success: true,
-      username: matchedCredential?.username || 'User'
+      username: matchedCredential?.username || 'User',
     };
   } catch (error) {
     console.error('Passkey authentication error:', error);

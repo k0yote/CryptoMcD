@@ -67,17 +67,20 @@ export function PaymentHistory({ history, onBack }: PaymentHistoryProps) {
         ) : (
           <div className="space-y-4">
             {history.map((record) => (
-              <div key={record.id} className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-indigo-300 transition-colors">
+              <div
+                key={record.id}
+                className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-indigo-300 transition-colors"
+              >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                       <CheckCircle2 className="w-6 h-6 text-green-600" />
                     </div>
                     <div>
-                      <h3 className="text-gray-900">{t('paymentHistory.order')} #{record.id.slice(0, 8)}</h3>
-                      <p className="text-sm text-gray-500">
-                        {formatDate(record.date)}
-                      </p>
+                      <h3 className="text-gray-900">
+                        {t('paymentHistory.order')} #{record.id.slice(0, 8)}
+                      </h3>
+                      <p className="text-sm text-gray-500">{formatDate(record.date)}</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -106,7 +109,9 @@ export function PaymentHistory({ history, onBack }: PaymentHistoryProps) {
                         <span className="text-gray-700">
                           {getItemName(item)} ×{item.quantity}
                         </span>
-                        <span className="text-gray-900">${(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="text-gray-900">
+                          ${(item.price * item.quantity).toFixed(2)}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -115,13 +120,20 @@ export function PaymentHistory({ history, onBack }: PaymentHistoryProps) {
                 {/* Network Info */}
                 {record.network && (
                   <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${
-                      record.network === 'base' ? 'bg-blue-500' :
-                      record.network === 'polygon' ? 'bg-purple-500' :
-                      record.network === 'avalanche' ? 'bg-red-500' :
-                      'bg-gray-700'
-                    }`}></div>
-                    <span className="text-sm text-gray-600 capitalize">{record.network} {t('paymentHistory.network')}</span>
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        record.network === 'base'
+                          ? 'bg-blue-500'
+                          : record.network === 'polygon'
+                            ? 'bg-purple-500'
+                            : record.network === 'avalanche'
+                              ? 'bg-red-500'
+                              : 'bg-gray-700'
+                      }`}
+                    ></div>
+                    <span className="text-sm text-gray-600 capitalize">
+                      {record.network} {t('paymentHistory.network')}
+                    </span>
                   </div>
                 )}
               </div>

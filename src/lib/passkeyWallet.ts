@@ -7,7 +7,7 @@
  * The wallet is a Smart Account that can verify P-256 signatures on-chain.
  */
 
-import { keccak256, encodePacked, getAddress } from 'viem';
+import { keccak256, getAddress } from 'viem';
 
 const RP_NAME = 'CryptoPay Wallet';
 const RP_ID = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
@@ -54,7 +54,12 @@ function base64ToUint8Array(base64: string): Uint8Array {
 }
 
 function uint8ArrayToHex(bytes: Uint8Array): string {
-  return '0x' + Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+  return (
+    '0x' +
+    Array.from(bytes)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+  );
 }
 
 function generateChallenge(): Uint8Array {
@@ -69,7 +74,9 @@ function generateUserId(): Uint8Array {
  * Extract the raw public key coordinates from SPKI format
  * The public key from getPublicKey() is in SPKI (SubjectPublicKeyInfo) format
  */
-async function extractPublicKeyCoordinates(spkiKey: ArrayBuffer): Promise<{ x: Uint8Array; y: Uint8Array } | null> {
+async function extractPublicKeyCoordinates(
+  spkiKey: ArrayBuffer
+): Promise<{ x: Uint8Array; y: Uint8Array } | null> {
   try {
     // Import the SPKI key using Web Crypto API
     const cryptoKey = await crypto.subtle.importKey(
@@ -146,8 +153,8 @@ function extractPublicKeyFromSPKI(spkiKey: ArrayBuffer): { x: Uint8Array; y: Uin
           const y = key.slice(i + 33, i + 65);
 
           // Validate: x and y should not be all zeros
-          const xIsValid = x.some(b => b !== 0);
-          const yIsValid = y.some(b => b !== 0);
+          const xIsValid = x.some((b) => b !== 0);
+          const yIsValid = y.some((b) => b !== 0);
 
           if (xIsValid && yIsValid) {
             return { x, y };
@@ -189,7 +196,9 @@ function deriveAddressFromPublicKey(publicKeyX: Uint8Array, publicKeyY: Uint8Arr
  * Create a new Passkey Wallet
  * Generates a new P-256 keypair using WebAuthn and derives an Ethereum address
  */
-export async function createPasskeyWallet(username: string): Promise<{ success: boolean; wallet?: PasskeyWallet; error?: string }> {
+export async function createPasskeyWallet(
+  username: string
+): Promise<{ success: boolean; wallet?: PasskeyWallet; error?: string }> {
   if (!window.PublicKeyCredential) {
     return { success: false, error: 'WebAuthn is not supported' };
   }
@@ -211,7 +220,7 @@ export async function createPasskeyWallet(username: string): Promise<{ success: 
       },
       pubKeyCredParams: [
         // P-256 (secp256r1) - now supported on Ethereum via EIP-7951
-        { alg: -7, type: 'public-key' },   // ES256 (ECDSA with P-256)
+        { alg: -7, type: 'public-key' }, // ES256 (ECDSA with P-256)
       ],
       authenticatorSelection: {
         authenticatorAttachment: 'platform',
@@ -222,9 +231,9 @@ export async function createPasskeyWallet(username: string): Promise<{ success: 
       attestation: 'direct', // We want to get the public key
     };
 
-    const credential = await navigator.credentials.create({
+    const credential = (await navigator.credentials.create({
       publicKey: publicKeyCredentialCreationOptions,
-    }) as PublicKeyCredential;
+    })) as PublicKeyCredential;
 
     if (!credential) {
       return { success: false, error: 'Credential creation cancelled' };
@@ -287,7 +296,9 @@ export async function createPasskeyWallet(username: string): Promise<{ success: 
  * Sign a message with Passkey
  * Returns a P-256 signature that can be verified on-chain via EIP-7212
  */
-export async function signWithPasskey(message: string): Promise<{ success: boolean; signature?: string; error?: string }> {
+export async function signWithPasskey(
+  message: string
+): Promise<{ success: boolean; signature?: string; error?: string }> {
   const wallet = getStoredWallet();
   if (!wallet) {
     return { success: false, error: 'No wallet found' };
@@ -303,16 +314,18 @@ export async function signWithPasskey(message: string): Promise<{ success: boole
       rpId: RP_ID,
       timeout: 60000,
       userVerification: 'required',
-      allowCredentials: [{
-        id: base64ToUint8Array(wallet.credentialId),
-        type: 'public-key',
-        transports: ['internal'],
-      }],
+      allowCredentials: [
+        {
+          id: base64ToUint8Array(wallet.credentialId),
+          type: 'public-key',
+          transports: ['internal'],
+        },
+      ],
     };
 
-    const assertion = await navigator.credentials.get({
+    const assertion = (await navigator.credentials.get({
       publicKey: publicKeyCredentialRequestOptions,
-    }) as PublicKeyCredential;
+    })) as PublicKeyCredential;
 
     if (!assertion) {
       return { success: false, error: 'Signing cancelled' };
@@ -331,7 +344,11 @@ export async function signWithPasskey(message: string): Promise<{ success: boole
 /**
  * Authenticate with existing Passkey Wallet
  */
-export async function authenticatePasskeyWallet(): Promise<{ success: boolean; wallet?: PasskeyWallet; error?: string }> {
+export async function authenticatePasskeyWallet(): Promise<{
+  success: boolean;
+  wallet?: PasskeyWallet;
+  error?: string;
+}> {
   const storedWallet = getStoredWallet();
   if (!storedWallet) {
     return { success: false, error: 'No wallet found' };
@@ -345,16 +362,18 @@ export async function authenticatePasskeyWallet(): Promise<{ success: boolean; w
       rpId: RP_ID,
       timeout: 60000,
       userVerification: 'required',
-      allowCredentials: [{
-        id: base64ToUint8Array(storedWallet.credentialId),
-        type: 'public-key',
-        transports: ['internal'],
-      }],
+      allowCredentials: [
+        {
+          id: base64ToUint8Array(storedWallet.credentialId),
+          type: 'public-key',
+          transports: ['internal'],
+        },
+      ],
     };
 
-    const assertion = await navigator.credentials.get({
+    const assertion = (await navigator.credentials.get({
       publicKey: publicKeyCredentialRequestOptions,
-    }) as PublicKeyCredential;
+    })) as PublicKeyCredential;
 
     if (!assertion) {
       return { success: false, error: 'Authentication cancelled' };
@@ -401,7 +420,11 @@ export function getPasskeyWalletAddress(): string | null {
   return wallet?.address ?? null;
 }
 
-export function getPasskeyWalletInfo(): { address: string; username: string; isSmartAccount: boolean } | null {
+export function getPasskeyWalletInfo(): {
+  address: string;
+  username: string;
+  isSmartAccount: boolean;
+} | null {
   const wallet = getStoredWallet();
   if (!wallet) return null;
   return {

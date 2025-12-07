@@ -23,12 +23,13 @@ const steps = [
 
 export function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-indigo-50">
+    <section
+      id="how-it-works"
+      className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-indigo-50"
+    >
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="mb-4 text-gray-900">
-            How It Works
-          </h2>
+          <h2 className="mb-4 text-gray-900">How It Works</h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Start accepting crypto payments in three simple steps
           </p>
@@ -44,16 +45,16 @@ export function HowItWorksSection() {
                     <ArrowRight className="w-6 h-6 text-indigo-300 mx-auto -ml-3" />
                   </div>
                 )}
-                
+
                 <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 text-center relative">
                   <div className="absolute -top-4 left-8 bg-indigo-600 text-white w-12 h-12 rounded-xl flex items-center justify-center shadow-lg">
                     <span className="text-lg">{step.step}</span>
                   </div>
-                  
+
                   <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-6 mt-4">
                     <Icon className="w-8 h-8 text-indigo-600" />
                   </div>
-                  
+
                   <h3 className="mb-3 text-gray-900">{step.title}</h3>
                   <p className="text-gray-600">{step.description}</p>
                 </div>

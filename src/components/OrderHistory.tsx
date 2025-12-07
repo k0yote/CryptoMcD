@@ -79,12 +79,17 @@ export function OrderHistory({ orders }: OrderHistoryProps) {
   return (
     <div className="space-y-4">
       {orders.map((order) => (
-        <div key={order.id} className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow">
+        <div
+          key={order.id}
+          className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow"
+        >
           <div className="flex items-start justify-between mb-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <h3 className="text-gray-900">Order #{order.id}</h3>
-                <span className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${getStatusColor(order.status)}`}>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${getStatusColor(order.status)}`}
+                >
                   {getStatusIcon(order.status)}
                   {getStatusText(order.status)}
                 </span>

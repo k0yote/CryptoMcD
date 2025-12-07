@@ -9,7 +9,6 @@ import {
   http,
   parseUnits,
   formatUnits,
-  encodeFunctionData,
   custom,
   type Address,
   type Hash,
@@ -269,7 +268,12 @@ export async function executePayment(
     });
 
     // Check balance
-    const hasBalance = await hasSufficientBalance(signer, request.amount, request.token, request.network);
+    const hasBalance = await hasSufficientBalance(
+      signer,
+      request.amount,
+      request.token,
+      request.network
+    );
     if (!hasBalance) {
       return { success: false, error: `Insufficient ${request.token} balance` };
     }
@@ -300,10 +304,7 @@ export async function executePayment(
 /**
  * Wait for transaction confirmation
  */
-export async function waitForTransaction(
-  txHash: Hash,
-  network: NetworkId
-): Promise<boolean> {
+export async function waitForTransaction(txHash: Hash, network: NetworkId): Promise<boolean> {
   try {
     const client = getPublicClient(network);
     const receipt = await client.waitForTransactionReceipt({

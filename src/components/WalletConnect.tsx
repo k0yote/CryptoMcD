@@ -21,7 +21,7 @@ export function WalletConnect({ onConnect, onDisconnect, connectedAddress }: Wal
   const handleConnect = async (provider: string) => {
     // Simulate wallet connection
     const mockAddress = '0x' + Math.random().toString(16).substring(2, 42).padEnd(40, '0');
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     onConnect(mockAddress, provider);
     setShowProviders(false);
   };
@@ -51,10 +51,7 @@ export function WalletConnect({ onConnect, onDisconnect, connectedAddress }: Wal
 
         {showProviders && (
           <>
-            <div
-              className="fixed inset-0 z-10"
-              onClick={() => setShowProviders(false)}
-            />
+            <div className="fixed inset-0 z-10" onClick={() => setShowProviders(false)} />
             <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-20">
               <div className="p-3 border-b border-gray-200">
                 <p className="text-sm text-gray-600">Select a wallet</p>
@@ -91,10 +88,7 @@ export function WalletConnect({ onConnect, onDisconnect, connectedAddress }: Wal
 
       {showMenu && (
         <>
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setShowMenu(false)}
-          />
+          <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
           <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-20">
             <div className="p-4 border-b border-gray-200">
               <p className="text-sm text-gray-600 mb-2">Connected Address</p>
@@ -118,7 +112,9 @@ export function WalletConnect({ onConnect, onDisconnect, connectedAddress }: Wal
                 )}
               </button>
               <button
-                onClick={() => window.open(`https://etherscan.io/address/${connectedAddress}`, '_blank')}
+                onClick={() =>
+                  window.open(`https://etherscan.io/address/${connectedAddress}`, '_blank')
+                }
                 className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors text-gray-700"
               >
                 <ExternalLink className="w-4 h-4" />

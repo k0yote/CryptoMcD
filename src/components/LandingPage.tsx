@@ -30,7 +30,9 @@ interface Order {
 export function LandingPage() {
   const [cart, setCart] = useState<{ [key: string]: CartItem }>({});
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [currentView, setCurrentView] = useState<'home' | 'checkout' | 'orders' | 'locations'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'checkout' | 'orders' | 'locations'>(
+    'home'
+  );
   const [orders, setOrders] = useState<Order[]>([
     {
       id: '001',
@@ -115,7 +117,7 @@ export function LandingPage() {
       deliveryMethod: orderDetails.deliveryMethod,
       address: orderDetails.address,
     };
-    
+
     setOrders([newOrder, ...orders]);
     setCart({});
     setCurrentView('orders');
@@ -193,7 +195,7 @@ export function LandingPage() {
       <ProductsSection onAddToCart={handleAddToCart} cart={cart} />
       <CTASection />
       <Footer />
-      
+
       <ShoppingCart
         items={cartItems}
         isOpen={isCartOpen}

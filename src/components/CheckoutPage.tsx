@@ -71,9 +71,11 @@ export function CheckoutPage({ items, onBack, onComplete }: CheckoutPageProps) {
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <MapPin className={`w-6 h-6 mx-auto mb-2 ${
-                    deliveryMethod === 'delivery' ? 'text-red-600' : 'text-gray-400'
-                  }`} />
+                  <MapPin
+                    className={`w-6 h-6 mx-auto mb-2 ${
+                      deliveryMethod === 'delivery' ? 'text-red-600' : 'text-gray-400'
+                    }`}
+                  />
                   <div className="text-sm">Delivery</div>
                   <div className="text-xs text-gray-500">$2.99</div>
                 </button>
@@ -143,9 +145,11 @@ export function CheckoutPage({ items, onBack, onComplete }: CheckoutPageProps) {
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <WalletIcon className={`w-6 h-6 mx-auto mb-2 ${
-                    paymentMethod === 'crypto' ? 'text-red-600' : 'text-gray-400'
-                  }`} />
+                  <WalletIcon
+                    className={`w-6 h-6 mx-auto mb-2 ${
+                      paymentMethod === 'crypto' ? 'text-red-600' : 'text-gray-400'
+                    }`}
+                  />
                   <div className="text-sm">Crypto</div>
                   <div className="text-xs text-gray-500">USDC, JPYC</div>
                 </button>
@@ -157,9 +161,11 @@ export function CheckoutPage({ items, onBack, onComplete }: CheckoutPageProps) {
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <CreditCard className={`w-6 h-6 mx-auto mb-2 ${
-                    paymentMethod === 'card' ? 'text-red-600' : 'text-gray-400'
-                  }`} />
+                  <CreditCard
+                    className={`w-6 h-6 mx-auto mb-2 ${
+                      paymentMethod === 'card' ? 'text-red-600' : 'text-gray-400'
+                    }`}
+                  />
                   <div className="text-sm">Card</div>
                   <div className="text-xs text-gray-500">Visa, Mastercard</div>
                 </button>
@@ -180,7 +186,7 @@ export function CheckoutPage({ items, onBack, onComplete }: CheckoutPageProps) {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-8">
               <h3 className="mb-4 text-gray-900">Order Summary</h3>
-              
+
               {/* Items */}
               <div className="space-y-3 mb-6 max-h-64 overflow-y-auto">
                 {items.map((item) => (

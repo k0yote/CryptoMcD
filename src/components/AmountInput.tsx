@@ -33,28 +33,17 @@ export function AmountInput({ amount, onAmountChange, currency }: AmountInputPro
     onAmountChange('0');
   };
 
-  const buttons = [
-    '1', '2', '3',
-    '4', '5', '6',
-    '7', '8', '9',
-    '.', '0', 'delete'
-  ];
+  const buttons = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'delete'];
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6">
       {/* Amount Display */}
       <div className="mb-6">
-        <label className="block mb-2 text-gray-600 text-sm">
-          Amount
-        </label>
+        <label className="block mb-2 text-gray-600 text-sm">Amount</label>
         <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
           <div className="text-right">
-            <div className="text-5xl text-gray-900 mb-1 font-mono">
-              {amount}
-            </div>
-            <div className="text-xl text-gray-500">
-              {currency}
-            </div>
+            <div className="text-5xl text-gray-900 mb-1 font-mono">{amount}</div>
+            <div className="text-xl text-gray-500">{currency}</div>
           </div>
         </div>
       </div>

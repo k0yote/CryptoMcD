@@ -41,7 +41,7 @@ const restaurants: Restaurant[] = [
     phone: '(718) 555-0789',
     hours: 'Open 24 hours',
     services: ['Delivery', 'Dine-in', 'Crypto Payment'],
-    coordinates: { lat: 40.7769, lng: -73.8740 },
+    coordinates: { lat: 40.7769, lng: -73.874 },
   },
   {
     id: '4',

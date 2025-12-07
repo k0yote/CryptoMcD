@@ -44,11 +44,10 @@ export function FeaturesSection() {
     <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="mb-4 text-gray-900">
-            Everything You Need for Crypto Payments
-          </h2>
+          <h2 className="mb-4 text-gray-900">Everything You Need for Crypto Payments</h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Built for businesses and individuals who need fast, secure, and affordable payment solutions.
+            Built for businesses and individuals who need fast, secure, and affordable payment
+            solutions.
           </p>
         </div>
 
@@ -60,7 +59,9 @@ export function FeaturesSection() {
                 key={feature.title}
                 className="bg-white border-2 border-gray-100 rounded-2xl p-8 hover:border-indigo-200 hover:shadow-lg transition-all"
               >
-                <div className={`w-14 h-14 ${feature.color} rounded-xl flex items-center justify-center mb-6`}>
+                <div
+                  className={`w-14 h-14 ${feature.color} rounded-xl flex items-center justify-center mb-6`}
+                >
                   <Icon className="w-7 h-7" />
                 </div>
                 <h3 className="mb-3 text-gray-900">{feature.title}</h3>

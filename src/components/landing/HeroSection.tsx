@@ -8,13 +8,12 @@ export function HeroSection() {
           <Zap className="w-4 h-4" />
           <span className="text-sm">Pay with Crypto or QR Code</span>
         </div>
-        
-        <h1 className="mb-6 text-white">
-          Order Your Favorites
-        </h1>
-        
+
+        <h1 className="mb-6 text-white">Order Your Favorites</h1>
+
         <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-          Fast food meets fast payments. Order now and pay with cryptocurrency or scan QR code - no wallet required!
+          Fast food meets fast payments. Order now and pay with cryptocurrency or scan QR code - no
+          wallet required!
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
