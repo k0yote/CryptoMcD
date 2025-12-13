@@ -131,6 +131,13 @@ Use the [Circle Faucet](https://faucet.circle.com/) to get free testnet USDC:
 - Polygon Amoy
 - Avalanche Fuji
 
+### JPYC Faucet
+
+Use the [JPYC Faucet](https://faucet.jpyc.jp/) to get free testnet JPYC:
+- Ethereum Sepolia
+- Polygon Amoy
+- Avalanche Fuji
+
 ### Native Tokens (for gas)
 
 - **Sepolia ETH**: [Alchemy Faucet](https://sepoliafaucet.com/)
