@@ -1,8 +1,13 @@
-# CryptoMcD
+# CryptoPay
 
-A crypto payment demo application for a fast-food ordering experience. Pay with stablecoins (USDC, JPYC) or credit card via Stripe.
+A crypto payment demo application implementing the **x402 protocol** for HTTP-native payments. Supports gasless USDC/JPYC payments via **EIP-3009 (transferWithAuthorization)**.
 
 ## Features
+
+- **x402 Payment Protocol**
+  - HTTP 402 Payment Required flow
+  - Gasless stablecoin transfers (facilitator pays gas)
+  - EIP-3009 meta-transactions
 
 - **Multi-Wallet Login**
   - Passkey Wallet (biometric authentication, no seed phrase)
@@ -13,7 +18,6 @@ A crypto payment demo application for a fast-food ordering experience. Pay with 
   - USDC and JPYC stablecoin support
   - QR code payment for external wallets
   - Direct payment from connected wallet
-  - Real-time balance checking
 
 - **Multi-Network Support** (Testnets only)
   - Ethereum Sepolia
@@ -25,85 +29,87 @@ A crypto payment demo application for a fast-food ordering experience. Pay with 
   - Credit/Debit card payments
   - Stripe Checkout redirect flow
 
-- **Bilingual Support**
-  - English
-  - Japanese
+## Architecture
+
+```
+cryptopay/
+├── apps/
+│   ├── web/                    # React client (Vite + Tailwind)
+│   └── server/                 # Resource server (Hono)
+│
+├── packages/
+│   ├── facilitator/            # Payment facilitator (EIP-3009)
+│   └── shared/                 # Shared types & constants
+│
+├── pnpm-workspace.yaml
+└── turbo.json
+```
+
+### Services
+
+| Service | Port | Description |
+|---------|------|-------------|
+| web | 3000 | React frontend |
+| server | 3001 | x402 API server |
+| facilitator | 3003 | EIP-3009 transaction executor |
 
 ## Tech Stack
 
-- React + TypeScript
-- Vite
-- Tailwind CSS
-- wagmi / viem (Ethereum interactions)
-- @reown/appkit (WalletConnect)
-- @simplewebauthn (Passkey authentication)
-- @stripe/stripe-js (Stripe payments)
-- i18next (Internationalization)
-- qrcode.react (QR code generation)
+- **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS
+- **Backend**: Hono (lightweight web framework)
+- **Blockchain**: viem, wagmi, @reown/appkit
+- **Build**: Turborepo + pnpm workspace
+- **Auth**: @simplewebauthn (Passkey)
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- npm or yarn
+- pnpm
 
 ### Installation
 
 ```bash
-npm install
-```
-
-### Environment Variables
-
-Create a `.env.local` file:
-
-```env
-# WalletConnect Project ID (required for wallet connections)
-VITE_WALLETCONNECT_PROJECT_ID=your_project_id
-
-# Store wallet address for receiving payments
-VITE_STORE_ADDRESS=0x...
-
-# Stripe (optional - demo mode if not set)
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
-VITE_API_URL=https://your-api.com
+pnpm install
 ```
 
 ### Development
 
 ```bash
-npm run dev
+# Start all services
+pnpm dev
+
+# Or start individually
+pnpm dev:web          # Web client (port 3000)
+pnpm dev:server       # API server (port 3001)
+pnpm dev:facilitator  # Facilitator (port 3003)
 ```
 
-### Build
+### Environment Variables
 
-```bash
-npm run build
+Create `.env` files in each package:
+
+**apps/web/.env**
+```env
+VITE_REOWN_PROJECT_ID=your_project_id
+VITE_API_URL=http://localhost:3001
+VITE_STORE_ADDRESS=0x...
 ```
 
-## Project Structure
+**packages/facilitator/.env**
+```env
+# Signer type: local | gcp-kms-secp256k1 | gcp-kms-p256
+SIGNER_TYPE=local
 
-```
-src/
-├── components/
-│   ├── SimpleLandingPage.tsx  # Main landing page
-│   ├── SimpleCheckout.tsx     # Payment flow
-│   ├── LoginModal.tsx         # Authentication modal
-│   ├── DirectPayment.tsx      # Wallet payment UI
-│   ├── PaymentQRCode.tsx      # QR code payment
-│   ├── StripeCheckout.tsx     # Stripe payment
-│   ├── BalanceView.tsx        # Wallet balance display
-│   └── ProfileMenu.tsx        # User profile dropdown
-├── lib/
-│   ├── payment-config.ts      # Network & token configuration
-│   ├── payment.ts             # Payment utilities
-│   ├── stripe.ts              # Stripe integration
-│   ├── passkeyWallet.ts       # Passkey wallet logic
-│   └── appkit.ts              # WalletConnect config
-└── locales/
-    ├── en.json                # English translations
-    └── ja.json                # Japanese translations
+# For local signer
+FACILITATOR_PRIVATE_KEY=0x...
+
+# For GCP KMS signer
+# GCP_PROJECT_ID=your-project
+# GCP_KMS_LOCATION=global
+# GCP_KMS_KEY_RING=your-ring
+# GCP_KMS_KEY_ID=your-key
 ```
 
 ## Token Availability by Network (Testnets)
@@ -115,22 +121,32 @@ src/
 | Polygon Amoy | ✅ | ✅ |
 | Avalanche Fuji | ✅ | ✅ |
 
-## Getting Test USDC
+## Getting Test Tokens
 
-To test payments, you'll need testnet USDC. Use the Circle USDC Faucet to get free test tokens:
+### USDC Faucet
 
-| Network | Faucet Link |
-|---------|-------------|
-| Sepolia | [Circle Faucet](https://faucet.circle.com/) - Select Ethereum Sepolia |
-| Base Sepolia | [Circle Faucet](https://faucet.circle.com/) - Select Base Sepolia |
-| Polygon Amoy | [Circle Faucet](https://faucet.circle.com/) - Select Polygon Amoy |
-| Avalanche Fuji | [Circle Faucet](https://faucet.circle.com/) - Select Avalanche Fuji |
+Use the [Circle Faucet](https://faucet.circle.com/) to get free testnet USDC:
+- Ethereum Sepolia
+- Base Sepolia
+- Polygon Amoy
+- Avalanche Fuji
 
-You'll also need testnet native tokens (ETH/POL/AVAX) for gas fees:
-- **Sepolia ETH**: [Alchemy Faucet](https://sepoliafaucet.com/) or [Infura Faucet](https://www.infura.io/faucet/sepolia)
+### Native Tokens (for gas)
+
+- **Sepolia ETH**: [Alchemy Faucet](https://sepoliafaucet.com/)
 - **Base Sepolia ETH**: [Base Faucet](https://www.base.org/ecosystem/faucets)
 - **Polygon Amoy POL**: [Polygon Faucet](https://faucet.polygon.technology/)
 - **Avalanche Fuji AVAX**: [Avalanche Faucet](https://faucet.avax.network/)
+
+## Facilitator Signer Options
+
+The facilitator supports multiple signing backends:
+
+| Signer | Use Case |
+|--------|----------|
+| `local` | Development, testing |
+| `gcp-kms-secp256k1` | Production (native Ethereum signing) |
+| `gcp-kms-p256` | Production (Smart Account / EIP-7212) |
 
 ## License
 

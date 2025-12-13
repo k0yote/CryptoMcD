@@ -10,7 +10,7 @@ pnpm dev              # Start all services in development mode
 pnpm build            # Build all packages for production
 pnpm dev:web          # Start only the web client (port 3000)
 pnpm dev:server       # Start only the API server (port 3001)
-pnpm dev:facilitator  # Start only the facilitator (port 3002)
+pnpm dev:facilitator  # Start only the facilitator (port 3003)
 ```
 
 ## Project Overview
@@ -21,7 +21,8 @@ CryptoPay is a crypto payment demo application implementing the **x402 protocol*
 - x402 protocol implementation (HTTP 402 Payment Required)
 - Gasless stablecoin transfers via EIP-3009
 - Passkey-based wallet generation (P-256/secp256r1)
-- Multi-chain support: Base, Polygon, Avalanche, Ethereum
+- Multi-chain testnet support
+- GCP KMS signer integration for production
 
 ## Architecture
 
@@ -36,7 +37,7 @@ cryptopay/
 │   │       ├── lib/            # Client utilities
 │   │       └── locales/        # i18n translations
 │   │
-│   └── server/                 # Resource server (Hono/Express)
+│   └── server/                 # Resource server (Hono)
 │       └── src/
 │           ├── routes/         # API endpoints with x402
 │           └── middleware/     # x402 middleware
@@ -44,6 +45,7 @@ cryptopay/
 ├── packages/
 │   ├── facilitator/            # Payment facilitator service
 │   │   └── src/
+│   │       ├── signers/        # Signer implementations (local, GCP KMS)
 │   │       ├── eip3009/        # EIP-3009 signature & transfer
 │   │       ├── chains/         # Chain-specific configs
 │   │       └── routes/         # /verify, /settle endpoints
@@ -89,7 +91,7 @@ cryptopay/
                                               │
                                               ▼
                                         Blockchain
-                                     (Base, Polygon...)
+                                    (Sepolia, Base Sepolia...)
 ```
 
 ### Tech Stack
@@ -114,23 +116,31 @@ cryptopay/
 - Gasless ERC-20 transfers via meta-transactions
 - User signs EIP-712 typed data off-chain
 - Facilitator submits transaction and pays gas
-- Supported by USDC v2 contract
+- Supported by USDC and JPYC contracts
 
 ### Passkey Wallet
 - WebAuthn P-256 keypair for wallet generation
 - ERC-4337 Smart Account compatible
 - No seed phrase - secured by device biometrics
 
-## Supported Networks & Tokens
+## Supported Networks & Tokens (Testnets Only)
 
 | Network | Chain ID | USDC | JPYC |
 |---------|----------|------|------|
-| Ethereum | 1 | ✓ | ✓ |
-| Base | 8453 | ✓ | - |
-| Polygon | 137 | ✓ | ✓ |
-| Avalanche | 43114 | ✓ | ✓ |
+| Sepolia | 11155111 | ✅ | ✅ |
+| Base Sepolia | 84532 | ✅ | ❌ |
+| Polygon Amoy | 80002 | ✅ | ✅ |
+| Avalanche Fuji | 43113 | ✅ | ✅ |
 
-Testnets: Sepolia, Base Sepolia, Polygon Amoy, Avalanche Fuji
+## Facilitator Signer Types
+
+The facilitator supports multiple signing backends:
+
+| Signer | Env Value | Use Case |
+|--------|-----------|----------|
+| Local Private Key | `local` | Development, testing |
+| GCP KMS secp256k1 | `gcp-kms-secp256k1` | Production (native Ethereum) |
+| GCP KMS P-256 | `gcp-kms-p256` | Production (Smart Account) |
 
 ## Environment Variables
 
@@ -138,15 +148,31 @@ Testnets: Sepolia, Base Sepolia, Polygon Amoy, Avalanche Fuji
 # apps/web
 VITE_REOWN_PROJECT_ID=<reown-project-id>
 VITE_API_URL=http://localhost:3001
+VITE_STORE_ADDRESS=<store-wallet-address>
 
 # apps/server
-FACILITATOR_URL=http://localhost:3002
+FACILITATOR_URL=http://localhost:3003
 STORE_ADDRESS=<store-wallet-address>
 
 # packages/facilitator
-PRIVATE_KEY=<facilitator-wallet-private-key>  # Pays gas fees
-RPC_URL_BASE=<base-rpc-url>
-RPC_URL_POLYGON=<polygon-rpc-url>
+SIGNER_TYPE=local                    # local | gcp-kms-secp256k1 | gcp-kms-p256
+FACILITATOR_PRIVATE_KEY=<private-key> # For local signer
+
+# GCP KMS (when using gcp-kms-* signer)
+GCP_PROJECT_ID=<gcp-project-id>
+GCP_KMS_LOCATION=global
+GCP_KMS_KEY_RING=<key-ring-name>
+GCP_KMS_KEY_ID=<key-id>
+GCP_KMS_KEY_VERSION=1
+
+# For P-256 signer with Smart Account
+SMART_ACCOUNT_ADDRESS=<smart-account-address>
+
+# Custom RPC URLs (optional)
+RPC_URL_SEPOLIA=<sepolia-rpc>
+RPC_URL_BASE_SEPOLIA=<base-sepolia-rpc>
+RPC_URL_POLYGON_AMOY=<polygon-amoy-rpc>
+RPC_URL_AVALANCHE_FUJI=<avalanche-fuji-rpc>
 ```
 
 ## Development
@@ -154,19 +180,25 @@ RPC_URL_POLYGON=<polygon-rpc-url>
 ### Adding a new chain
 1. Add chain config to `packages/shared/src/constants/chains.ts`
 2. Add token addresses to `packages/shared/src/constants/tokens.ts`
-3. Add RPC config to `packages/facilitator/src/chains/`
-4. Update `apps/web` chain selector UI
+3. Add viem chain to `packages/facilitator/src/chains/config.ts`
+4. Update `apps/web/src/lib/payment-config.ts`
+5. Update `apps/web/src/components/ChainIcons.tsx`
 
 ### Adding a new token
 1. Verify token supports EIP-3009 (transferWithAuthorization)
 2. Add token config to `packages/shared/src/constants/tokens.ts`
-3. Update facilitator token whitelist
+3. Add to `apps/web/src/lib/payment-config.ts`
+
+### Adding a new signer type
+1. Create signer class in `packages/facilitator/src/signers/`
+2. Implement the `Signer` interface
+3. Add to factory in `packages/facilitator/src/signers/factory.ts`
 
 ## Internationalization
 
 ```bash
-pnpm --filter web i18n:build  # Build translation dictionaries
-pnpm --filter web i18n:fill   # Auto-fill missing translations (requires ANTHROPIC_API_KEY)
+pnpm --filter @cryptopay/web i18n:build  # Build translation dictionaries
+pnpm --filter @cryptopay/web i18n:fill   # Auto-fill missing translations
 ```
 
 Supported languages: English (`en`), Japanese (`ja`), Korean (`ko`)
