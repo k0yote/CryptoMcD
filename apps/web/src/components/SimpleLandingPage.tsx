@@ -7,6 +7,7 @@ import { LoginModal } from './LoginModal';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { ProfileMenu } from './ProfileMenu';
 import { BalanceView } from './BalanceView';
+import { SupportedChains } from './ChainIcons';
 import { useAppKitAccount, useDisconnect } from '@reown/appkit/react';
 import { getPasskeyWalletInfo } from '../lib/passkeyWallet';
 
@@ -307,11 +308,14 @@ export function SimpleLandingPage() {
                     <div className="text-8xl">{product.image}</div>
                   </div>
                   <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-start justify-between mb-2">
                       <h3 className="text-gray-900">{t(product.nameKey)}</h3>
                       <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm">
                         ${product.price}
                       </span>
+                    </div>
+                    <div className="flex items-center gap-1 mb-4">
+                      <SupportedChains iconSize={18} showNames={false} className="gap-1.5" />
                     </div>
                     <button
                       onClick={() => addToCart(product)}

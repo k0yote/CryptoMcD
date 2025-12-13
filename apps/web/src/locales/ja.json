@@ -13,7 +13,8 @@
   },
   "hero": {
     "title": "お気に入りを注文",
-    "subtitle": "暗号通貨またはカードで簡単にお支払い"
+    "subtitle": "暗号通貨またはカードで簡単にお支払い",
+    "supportedNetworks": "対応ネットワーク"
   },
   "menu": {
     "title": "メニュー",

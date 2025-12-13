@@ -4,3 +4,12 @@ dist
 .env
 .env.local
 .env.*.local
+
+# Turborepo
+.turbo
+
+# pnpm
+pnpm-debug.log*
+
+# Intlayer
+.intlayer
