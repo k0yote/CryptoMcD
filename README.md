@@ -15,11 +15,11 @@ A crypto payment demo application for a fast-food ordering experience. Pay with 
   - Direct payment from connected wallet
   - Real-time balance checking
 
-- **Multi-Network Support**
-  - Ethereum (Mainnet, Sepolia)
-  - Base (Mainnet, Sepolia)
-  - Polygon (Mainnet, Amoy)
-  - Avalanche (Mainnet, Fuji)
+- **Multi-Network Support** (Testnets only)
+  - Ethereum Sepolia
+  - Base Sepolia
+  - Polygon Amoy
+  - Avalanche Fuji
 
 - **Stripe Integration**
   - Credit/Debit card payments
@@ -106,18 +106,31 @@ src/
     └── ja.json                # Japanese translations
 ```
 
-## Token Availability by Network
+## Token Availability by Network (Testnets)
 
 | Network | USDC | JPYC |
 |---------|------|------|
-| Ethereum | ✅ | ✅ |
 | Sepolia | ✅ | ❌ |
-| Base | ✅ | ❌ |
 | Base Sepolia | ✅ | ❌ |
-| Polygon | ✅ | ✅ |
 | Polygon Amoy | ✅ | ✅ |
-| Avalanche | ✅ | ✅ |
 | Avalanche Fuji | ✅ | ❌ |
+
+## Getting Test USDC
+
+To test payments, you'll need testnet USDC. Use the Circle USDC Faucet to get free test tokens:
+
+| Network | Faucet Link |
+|---------|-------------|
+| Sepolia | [Circle Faucet](https://faucet.circle.com/) - Select Ethereum Sepolia |
+| Base Sepolia | [Circle Faucet](https://faucet.circle.com/) - Select Base Sepolia |
+| Polygon Amoy | [Circle Faucet](https://faucet.circle.com/) - Select Polygon Amoy |
+| Avalanche Fuji | [Circle Faucet](https://faucet.circle.com/) - Select Avalanche Fuji |
+
+You'll also need testnet native tokens (ETH/POL/AVAX) for gas fees:
+- **Sepolia ETH**: [Alchemy Faucet](https://sepoliafaucet.com/) or [Infura Faucet](https://www.infura.io/faucet/sepolia)
+- **Base Sepolia ETH**: [Base Faucet](https://www.base.org/ecosystem/faucets)
+- **Polygon Amoy POL**: [Polygon Faucet](https://faucet.polygon.technology/)
+- **Avalanche Fuji AVAX**: [Avalanche Faucet](https://faucet.avax.network/)
 
 ## License
 

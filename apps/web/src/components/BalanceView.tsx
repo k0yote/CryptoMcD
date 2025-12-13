@@ -42,7 +42,7 @@ export function BalanceView({ address, username, onBack }: BalanceViewProps) {
   const [nativeBalance, setNativeBalance] = useState<string>('0');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedNetwork, setSelectedNetwork] = useState<NetworkId>('base');
+  const [selectedNetwork, setSelectedNetwork] = useState<NetworkId>('base-sepolia');
 
   const networkConfig = SUPPORTED_NETWORKS[selectedNetwork];
 

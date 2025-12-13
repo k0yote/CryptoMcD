@@ -11,18 +11,11 @@ export interface NetworkConfig {
     symbol: string;
     decimals: number;
   };
-  isTestnet?: boolean;
+  isTestnet: boolean;
 }
 
+// Testnet only - mainnet support will be added after thorough testing
 export const SUPPORTED_NETWORKS = {
-  ethereum: {
-    chainId: 1,
-    name: 'Ethereum',
-    rpcUrl: 'https://eth.llamarpc.com',
-    explorerUrl: 'https://etherscan.io',
-    color: '#627EEA',
-    nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
-  },
   sepolia: {
     chainId: 11155111,
     name: 'Sepolia',
@@ -31,14 +24,6 @@ export const SUPPORTED_NETWORKS = {
     color: '#627EEA',
     nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
     isTestnet: true,
-  },
-  base: {
-    chainId: 8453,
-    name: 'Base',
-    rpcUrl: 'https://mainnet.base.org',
-    explorerUrl: 'https://basescan.org',
-    color: '#0052FF',
-    nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
   },
   'base-sepolia': {
     chainId: 84532,
@@ -49,14 +34,6 @@ export const SUPPORTED_NETWORKS = {
     nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
     isTestnet: true,
   },
-  polygon: {
-    chainId: 137,
-    name: 'Polygon',
-    rpcUrl: 'https://polygon-rpc.com',
-    explorerUrl: 'https://polygonscan.com',
-    color: '#8247E5',
-    nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
-  },
   'polygon-amoy': {
     chainId: 80002,
     name: 'Polygon Amoy',
@@ -65,14 +42,6 @@ export const SUPPORTED_NETWORKS = {
     color: '#8247E5',
     nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
     isTestnet: true,
-  },
-  avalanche: {
-    chainId: 43114,
-    name: 'Avalanche',
-    rpcUrl: 'https://api.avax.network/ext/bc/C/rpc',
-    explorerUrl: 'https://snowtrace.io',
-    color: '#E84142',
-    nativeCurrency: { name: 'Avalanche', symbol: 'AVAX', decimals: 18 },
   },
   'avalanche-fuji': {
     chainId: 43113,

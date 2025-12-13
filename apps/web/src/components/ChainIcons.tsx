@@ -1,8 +1,9 @@
 import { SUPPORTED_NETWORKS, type NetworkId } from '../lib/payment-config';
 
-// SVG icons for each chain
+// SVG icons for each chain (testnets use same icons as mainnets)
 const chainSvgs: Record<string, React.ReactNode> = {
-  ethereum: (
+  // Ethereum / Sepolia
+  sepolia: (
     <svg viewBox="0 0 32 32" className="w-full h-full">
       <g fill="none" fillRule="evenodd">
         <circle fill="#627EEA" cx="16" cy="16" r="16" />
@@ -17,7 +18,8 @@ const chainSvgs: Record<string, React.ReactNode> = {
       </g>
     </svg>
   ),
-  base: (
+  // Base / Base Sepolia
+  'base-sepolia': (
     <svg viewBox="0 0 111 111" className="w-full h-full">
       <g fill="none">
         <circle fill="#0052FF" cx="55.5" cy="55.5" r="55.5" />
@@ -28,7 +30,8 @@ const chainSvgs: Record<string, React.ReactNode> = {
       </g>
     </svg>
   ),
-  polygon: (
+  // Polygon / Polygon Amoy
+  'polygon-amoy': (
     <svg viewBox="0 0 38 33" className="w-full h-full">
       <g fill="none">
         <path
@@ -38,7 +41,8 @@ const chainSvgs: Record<string, React.ReactNode> = {
       </g>
     </svg>
   ),
-  avalanche: (
+  // Avalanche / Avalanche Fuji
+  'avalanche-fuji': (
     <svg viewBox="0 0 254 254" className="w-full h-full">
       <g fill="none">
         <circle fill="#E84142" cx="127" cy="127" r="127" />
@@ -51,8 +55,8 @@ const chainSvgs: Record<string, React.ReactNode> = {
   ),
 };
 
-// Main networks to display (excluding testnets)
-const mainNetworks: NetworkId[] = ['ethereum', 'base', 'polygon', 'avalanche'];
+// Testnet networks to display
+const testnetNetworks: NetworkId[] = ['sepolia', 'base-sepolia', 'polygon-amoy', 'avalanche-fuji'];
 
 interface ChainIconProps {
   chainId: NetworkId;
@@ -64,7 +68,7 @@ export function ChainIcon({ chainId, size = 32, showName = false }: ChainIconPro
   const network = SUPPORTED_NETWORKS[chainId];
   const svg = chainSvgs[chainId];
 
-  if (!svg) return null;
+  if (!svg || !network) return null;
 
   return (
     <div className="flex flex-col items-center gap-1">
@@ -92,7 +96,7 @@ export function SupportedChains({
 }: SupportedChainsProps) {
   return (
     <div className={`flex items-center justify-center gap-4 ${className}`}>
-      {mainNetworks.map((networkId) => (
+      {testnetNetworks.map((networkId) => (
         <ChainIcon key={networkId} chainId={networkId} size={iconSize} showName={showNames} />
       ))}
     </div>

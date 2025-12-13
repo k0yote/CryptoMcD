@@ -1,17 +1,13 @@
 import { createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { base, baseSepolia, polygon, polygonAmoy, mainnet, sepolia, avalanche, avalancheFuji } from 'viem/chains';
+import { baseSepolia, polygonAmoy, sepolia, avalancheFuji } from 'viem/chains';
 import type { NetworkId } from '@cryptopay/shared';
 
-// Chain configurations for viem
+// Chain configurations for viem (testnets only)
 export const VIEM_CHAINS = {
-  ethereum: mainnet,
   sepolia: sepolia,
-  base: base,
   'base-sepolia': baseSepolia,
-  polygon: polygon,
   'polygon-amoy': polygonAmoy,
-  avalanche: avalanche,
   'avalanche-fuji': avalancheFuji,
 } as const;
 
@@ -22,15 +18,11 @@ function getRpcUrl(network: NetworkId): string {
 
   if (rpcUrl) return rpcUrl;
 
-  // Fallback to default RPCs
+  // Fallback to default RPCs (testnets only)
   const defaults: Record<NetworkId, string> = {
-    ethereum: 'https://eth.llamarpc.com',
     sepolia: 'https://rpc.sepolia.org',
-    base: 'https://mainnet.base.org',
     'base-sepolia': 'https://sepolia.base.org',
-    polygon: 'https://polygon-rpc.com',
     'polygon-amoy': 'https://rpc-amoy.polygon.technology',
-    avalanche: 'https://api.avax.network/ext/bc/C/rpc',
     'avalanche-fuji': 'https://api.avax-test.network/ext/bc/C/rpc',
   };
 

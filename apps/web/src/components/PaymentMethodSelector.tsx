@@ -1,7 +1,7 @@
 import { CreditCard, Coins } from 'lucide-react';
 
 type PaymentMethod = 'USDC' | 'JPYC' | 'Stripe';
-type Network = 'base' | 'polygon' | 'avalanche' | 'ethereum';
+type Network = 'sepolia' | 'base-sepolia' | 'polygon-amoy' | 'avalanche-fuji';
 
 interface PaymentMethodSelectorProps {
   paymentMethod: PaymentMethod;
@@ -17,10 +17,10 @@ const paymentMethods: { value: PaymentMethod; label: string; icon: any }[] = [
 ];
 
 const networks: { value: Network; label: string; color: string }[] = [
-  { value: 'base', label: 'Base', color: 'bg-blue-500' },
-  { value: 'polygon', label: 'Polygon', color: 'bg-purple-500' },
-  { value: 'avalanche', label: 'Avalanche', color: 'bg-red-500' },
-  { value: 'ethereum', label: 'Ethereum', color: 'bg-gray-700' },
+  { value: 'sepolia', label: 'Sepolia', color: 'bg-gray-700' },
+  { value: 'base-sepolia', label: 'Base Sepolia', color: 'bg-blue-500' },
+  { value: 'polygon-amoy', label: 'Polygon Amoy', color: 'bg-purple-500' },
+  { value: 'avalanche-fuji', label: 'Avalanche Fuji', color: 'bg-red-500' },
 ];
 
 export function PaymentMethodSelector({

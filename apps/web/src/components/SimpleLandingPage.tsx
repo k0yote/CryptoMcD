@@ -32,7 +32,7 @@ interface PaymentRecord {
   }>;
   total: number;
   paymentMethod: 'USDC' | 'JPYC' | 'Stripe';
-  network?: 'base' | 'polygon' | 'avalanche' | 'ethereum';
+  network?: 'sepolia' | 'base-sepolia' | 'polygon-amoy' | 'avalanche-fuji';
   status: 'completed';
 }
 
@@ -166,7 +166,7 @@ export function SimpleLandingPage() {
 
   const handlePaymentComplete = (
     paymentMethod: 'USDC' | 'JPYC' | 'Stripe',
-    network?: 'base' | 'polygon' | 'avalanche' | 'ethereum'
+    network?: 'sepolia' | 'base-sepolia' | 'polygon-amoy' | 'avalanche-fuji'
   ) => {
     const newRecord: PaymentRecord = {
       id: Date.now().toString(),

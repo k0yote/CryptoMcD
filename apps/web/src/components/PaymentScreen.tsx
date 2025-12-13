@@ -8,7 +8,7 @@ import { QRPayment } from './QRPayment';
 import { ArrowRight, CheckCircle2, QrCode } from 'lucide-react';
 
 type PaymentMethod = 'USDC' | 'JPYC' | 'Stripe';
-type Network = 'base' | 'polygon' | 'avalanche' | 'ethereum';
+type Network = 'sepolia' | 'base-sepolia' | 'polygon-amoy' | 'avalanche-fuji';
 
 interface Transaction {
   id: string;
@@ -24,7 +24,7 @@ interface Transaction {
 
 export function PaymentScreen() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('USDC');
-  const [network, setNetwork] = useState<Network>('base');
+  const [network, setNetwork] = useState<Network>('base-sepolia');
   const [amount, setAmount] = useState('0');
   const [recipient, setRecipient] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -38,7 +38,7 @@ export function PaymentScreen() {
       amount: '100.00',
       currency: 'USDC',
       address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-      network: 'base',
+      network: 'base-sepolia',
       timestamp: new Date(Date.now() - 3600000),
       status: 'completed',
       txHash: '0x1234...5678',
@@ -49,7 +49,7 @@ export function PaymentScreen() {
       amount: '50.00',
       currency: 'JPYC',
       address: '0x8ba1f109551bD432803012645Ac136ddd64DBA72',
-      network: 'polygon',
+      network: 'polygon-amoy',
       timestamp: new Date(Date.now() - 7200000),
       status: 'completed',
       txHash: '0xabcd...efgh',
@@ -60,7 +60,7 @@ export function PaymentScreen() {
       amount: '25.50',
       currency: 'USDC',
       address: '0x9f8a26e2e7D33C3B8e2e5c7a1D4F6B9C8A7E6D5C',
-      network: 'ethereum',
+      network: 'sepolia',
       timestamp: new Date(Date.now() - 86400000),
       status: 'pending',
       txHash: '0x9876...5432',

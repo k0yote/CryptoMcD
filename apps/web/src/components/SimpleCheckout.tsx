@@ -122,7 +122,7 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
 
   const handleComplete = () => {
     if (paymentMethod) {
-      onComplete(paymentMethod, paymentMethod !== 'Stripe' ? network : undefined);
+      onComplete(paymentMethod, paymentMethod !== 'Stripe' ? network ?? undefined : undefined);
     }
   };
 
@@ -319,8 +319,8 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
             {t('payment.selectPaymentFlow')}
           </h1>
           <p className="text-gray-600 mb-8">
-            {t('common.total')}: ${total.toFixed(2)} ({usdToTokenAmount(total, paymentMethod!)}{' '}
-            {paymentMethod})
+            {t('common.total')}: ${total.toFixed(2)} (
+            {usdToTokenAmount(total, paymentMethod as TokenSymbol)} {paymentMethod})
           </p>
 
           <div className="space-y-4">
