@@ -53,7 +53,7 @@ app.onError((err, c) => {
   return c.json({ error: 'Internal Server Error' }, 500);
 });
 
-const port = parseInt(process.env.PORT || '3002', 10);
+const port = parseInt(process.env.PORT || '3003', 10);
 
 console.log(`🔐 Facilitator starting on http://localhost:${port}`);
 

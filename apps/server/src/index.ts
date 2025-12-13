@@ -11,7 +11,7 @@ app.use('*', logger());
 app.use(
   '*',
   cors({
-    origin: ['http://localhost:3000', 'http://localhost:5173'],
+    origin: ['http://localhost:3000', 'http://localhost:3002', 'http://localhost:5173'],
     allowHeaders: ['Content-Type', 'X-PAYMENT-SIGNATURE', 'X-Order-Total'],
     exposeHeaders: ['X-PAYMENT-REQUIRED'],
   })

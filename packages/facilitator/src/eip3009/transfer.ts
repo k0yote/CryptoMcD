@@ -1,6 +1,7 @@
 import type { Address, Hex } from 'viem';
 import { type PaymentPayload, type NetworkId, getTokenAddress, EIP3009_ABI } from '@cryptopay/shared';
-import { getPublicClient, getWalletClient } from '../chains/config';
+import { getPublicClient, getWalletClient, getSigner, getFacilitatorAddress } from '../chains/config';
+import { LocalSigner } from '../signers';
 
 interface TransferResult {
   success: boolean;
@@ -19,59 +20,71 @@ export async function executeTransferWithAuthorization(
   const { network, token } = requirement;
 
   const tokenAddress = getTokenAddress(token, network);
+  const signer = getSigner();
 
   try {
-    const walletClient = getWalletClient(network);
     const publicClient = getPublicClient(network);
 
-    // Prepare transaction
-    const { request } = await publicClient.simulateContract({
-      address: tokenAddress,
-      abi: EIP3009_ABI,
-      functionName: 'transferWithAuthorization',
-      args: [
-        authorization.from,
-        authorization.to,
-        authorization.value,
-        authorization.validAfter,
-        authorization.validBefore,
-        authorization.nonce,
-        authorization.v,
-        authorization.r,
-        authorization.s,
-      ],
-      account: walletClient.account,
-    });
+    // For local signer, use wallet client directly
+    if (signer instanceof LocalSigner) {
+      const walletClient = getWalletClient(network);
 
-    // Send transaction
-    const hash = await walletClient.writeContract(request);
+      // Prepare transaction
+      const { request } = await publicClient.simulateContract({
+        address: tokenAddress,
+        abi: EIP3009_ABI,
+        functionName: 'transferWithAuthorization',
+        args: [
+          authorization.from,
+          authorization.to,
+          authorization.value,
+          authorization.validAfter,
+          authorization.validBefore,
+          authorization.nonce,
+          authorization.v,
+          authorization.r,
+          authorization.s,
+        ],
+        account: walletClient.account,
+      });
 
-    // Wait for confirmation
-    const receipt = await publicClient.waitForTransactionReceipt({
-      hash,
-      confirmations: 1,
-    });
+      // Send transaction
+      const hash = await walletClient.writeContract(request);
 
-    if (receipt.status === 'reverted') {
+      // Wait for confirmation
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash,
+        confirmations: 1,
+      });
+
+      if (receipt.status === 'reverted') {
+        return {
+          success: false,
+          transactionHash: hash,
+          error: 'Transaction reverted',
+        };
+      }
+
+      console.log('Transfer successful:', {
+        hash,
+        from: authorization.from,
+        to: authorization.to,
+        value: authorization.value.toString(),
+        network,
+      });
+
       return {
-        success: false,
+        success: true,
         transactionHash: hash,
-        error: 'Transaction reverted',
       };
     }
 
-    console.log('Transfer successful:', {
-      hash,
-      from: authorization.from,
-      to: authorization.to,
-      value: authorization.value.toString(),
-      network,
-    });
-
-    return {
-      success: true,
-      transactionHash: hash,
-    };
+    // For KMS signers, we need to manually sign and send
+    // This is a more complex flow that requires raw transaction signing
+    throw new Error(
+      `KMS signer transaction execution not yet implemented for ${signer.type}. ` +
+        'Please use a local private key signer for now.'
+    );
   } catch (error) {
     console.error('Transfer failed:', error);
 
@@ -112,10 +125,8 @@ export async function checkFacilitatorBalance(network: NetworkId): Promise<{
   balance: bigint;
   sufficient: boolean;
 }> {
-  const walletClient = getWalletClient(network);
   const publicClient = getPublicClient(network);
-
-  const address = walletClient.account.address;
+  const address = await getFacilitatorAddress();
   const balance = await publicClient.getBalance({ address });
 
   // Require at least 0.01 ETH/native token for gas

@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@cryptopay/shared": "workspace:*",
+    "@google-cloud/kms": "^5.2.1",
     "@hono/node-server": "^1.13.7",
     "hono": "^4.6.12",
     "viem": "^2.41.2"
