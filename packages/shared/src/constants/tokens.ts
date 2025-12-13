@@ -34,10 +34,10 @@ export const SUPPORTED_TOKENS = {
     icon: '💴',
     supportsEIP3009: true, // JPYC supports EIP-3009
     addresses: {
-      sepolia: ZERO_ADDRESS,
-      'base-sepolia': ZERO_ADDRESS,
-      'polygon-amoy': '0xAc5e2848c22052D5C674892562Fd900e512D5428',
-      'avalanche-fuji': ZERO_ADDRESS,
+      sepolia: '0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB',
+      'base-sepolia': ZERO_ADDRESS, // JPYC not available on Base Sepolia
+      'polygon-amoy': '0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB',
+      'avalanche-fuji': '0x431D5dfF03120AFA4bDf332c61A6e1766eF37BDB',
     },
   },
 } as const satisfies Record<string, TokenConfig>;

@@ -110,10 +110,10 @@ src/
 
 | Network | USDC | JPYC |
 |---------|------|------|
-| Sepolia | ✅ | ❌ |
+| Sepolia | ✅ | ✅ |
 | Base Sepolia | ✅ | ❌ |
 | Polygon Amoy | ✅ | ✅ |
-| Avalanche Fuji | ✅ | ❌ |
+| Avalanche Fuji | ✅ | ✅ |
 
 ## Getting Test USDC
 
