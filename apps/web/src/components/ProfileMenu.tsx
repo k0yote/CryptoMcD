@@ -127,22 +127,6 @@ export function ProfileMenu({
                 <p className="text-xs text-gray-500">{t('profile.historyDescription')}</p>
               </div>
             </button>
-
-            {/* View on Explorer */}
-            <a
-              href={`https://basescan.org/address/${address}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 rounded-lg transition-colors text-left"
-            >
-              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                <ExternalLink className="w-4 h-4 text-purple-600" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">{t('profile.viewOnExplorer')}</p>
-                <p className="text-xs text-gray-500">BaseScan</p>
-              </div>
-            </a>
           </div>
 
           {/* Logout */}

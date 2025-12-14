@@ -28,7 +28,7 @@ function getRpcUrl(network: NetworkId): string {
 
   // Fallback to default RPCs (testnets only)
   const defaults: Record<NetworkId, string> = {
-    sepolia: 'https://rpc.sepolia.org',
+    sepolia: 'https://ethereum-sepolia-rpc.publicnode.com',
     'base-sepolia': 'https://sepolia.base.org',
     'polygon-amoy': 'https://rpc-amoy.polygon.technology',
     'avalanche-fuji': 'https://api.avax-test.network/ext/bc/C/rpc',

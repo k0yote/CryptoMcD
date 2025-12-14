@@ -81,7 +81,10 @@
     "paymentSuccessful": "お支払い完了！",
     "orderConfirmed": "ご注文が確定しました",
     "orderTotal": "注文合計",
-    "done": "完了"
+    "done": "完了",
+    "loadingRate": "レート取得中...",
+    "refreshRate": "レートを更新",
+    "payButton": "で支払う"
   },
   "paymentHistory": {
     "title": "支払い履歴",
@@ -151,6 +154,8 @@
     "requestExpired": "支払いリクエストの期限が切れました",
     "confirmInWallet": "ウォレットで確認中...",
     "waitingConfirmation": "確認を待っています...",
+    "signInWallet": "ウォレットで署名中...",
+    "processing": "支払い処理中...",
     "payNow": "{{amount}} {{token}}を支払う",
     "success": "支払い完了！",
     "successDescription": "ブロックチェーンで支払いが確認されました",

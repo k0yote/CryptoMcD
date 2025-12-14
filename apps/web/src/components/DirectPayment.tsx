@@ -1,16 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Wallet, Loader2, CheckCircle2, AlertCircle, ExternalLink } from 'lucide-react';
-import { useAccount, useSwitchChain } from 'wagmi';
+import { Wallet, Loader2, CheckCircle2, AlertCircle, ExternalLink, Fingerprint } from 'lucide-react';
+import { useAccount, useSwitchChain, useConnectorClient } from 'wagmi';
 import {
   type PaymentRequest,
-  executePayment,
-  waitForTransaction,
   getTransactionUrl,
   getTokenBalance,
   formatTokenAmount,
   isPaymentRequestValid,
 } from '@/lib/payment';
+import { createEIP3009Authorization, createPasskeyEIP3009Authorization, settlePayment } from '@/lib/eip3009';
 import { SUPPORTED_NETWORKS, SUPPORTED_TOKENS } from '@/lib/payment-config';
 import { WalletAvatar } from './WalletAvatar';
 
@@ -18,21 +17,28 @@ interface DirectPaymentProps {
   request: PaymentRequest;
   onSuccess: (txHash: string) => void;
   onCancel: () => void;
+  /** If provided, use passkey wallet instead of wagmi wallet */
+  passkeyAddress?: string;
+  /** Username for passkey wallet display */
+  passkeyUsername?: string;
 }
 
 type PaymentStatus =
   | 'idle'
   | 'checking'
-  | 'confirming'
-  | 'sending'
-  | 'waiting'
+  | 'signing'      // User signing EIP-3009 authorization
+  | 'processing'   // Facilitator executing transaction
   | 'success'
   | 'error';
 
-export function DirectPayment({ request, onSuccess, onCancel }: DirectPaymentProps) {
+export function DirectPayment({ request, onSuccess, onCancel, passkeyAddress, passkeyUsername }: DirectPaymentProps) {
   const { t } = useTranslation();
-  const { address, chain } = useAccount();
+  const { address: wagmiAddress, chain } = useAccount();
   const { switchChain } = useSwitchChain();
+
+  // Use passkey address if provided, otherwise use wagmi address
+  const isPasskeyWallet = !!passkeyAddress;
+  const address = passkeyAddress || wagmiAddress;
 
   const [status, setStatus] = useState<PaymentStatus>('idle');
   const [balance, setBalance] = useState<string | null>(null);
@@ -42,37 +48,97 @@ export function DirectPayment({ request, onSuccess, onCancel }: DirectPaymentPro
   const network = SUPPORTED_NETWORKS[request.network];
   const token = SUPPORTED_TOKENS[request.token];
   const expectedChainId = network.chainId;
-  const isCorrectNetwork = chain?.id === expectedChainId;
+  // Passkey wallets don't need network switching - facilitator handles the network
+  const isCorrectNetwork = isPasskeyWallet ? true : chain?.id === expectedChainId;
 
-  // Check balance on mount
-  useEffect(() => {
-    async function checkBalance() {
-      if (!address) return;
+  // Debug log for chain checking
+  console.log('[DirectPayment] Current chain:', chain?.id, 'Expected:', expectedChainId, 'isCorrect:', isCorrectNetwork, 'isPasskey:', isPasskeyWallet);
 
-      setStatus('checking');
-      try {
-        const bal = await getTokenBalance(address, request.token, request.network);
-        setBalance(bal);
-        setStatus('idle');
-      } catch (err) {
-        console.error('Failed to check balance:', err);
-        setBalance(null);
-        setStatus('idle');
-      }
+  const isInitialLoad = useRef(true);
+
+  // Balance fetching function
+  const fetchBalance = useCallback(async () => {
+    if (!address) return;
+
+    try {
+      const bal = await getTokenBalance(address, request.token, request.network);
+      setBalance(bal);
+      setStatus((prev) => (prev === 'checking' ? 'idle' : prev));
+    } catch (err) {
+      console.error('Failed to check balance:', err);
+      setStatus((prev) => (prev === 'checking' ? 'idle' : prev));
     }
-
-    checkBalance();
   }, [address, request.token, request.network]);
+
+  // Initial balance check
+  useEffect(() => {
+    if (isInitialLoad.current && address) {
+      isInitialLoad.current = false;
+      setStatus('checking');
+      fetchBalance();
+    }
+  }, [address, fetchBalance]);
+
+  // Auto-refresh balance every 5 seconds
+  useEffect(() => {
+    if (!address) return;
+
+    const interval = setInterval(fetchBalance, 5000);
+    return () => clearInterval(interval);
+  }, [address, fetchBalance]);
 
   const hasSufficientBalance =
     balance !== null && parseFloat(balance) >= parseFloat(request.amount);
 
+  const { data: connectorClient } = useConnectorClient();
+
   const handleSwitchNetwork = async () => {
+    console.log('[SwitchNetwork] Starting switch to chainId:', expectedChainId);
+    console.log('[SwitchNetwork] Network config:', network);
+    console.log('[SwitchNetwork] Current chain:', chain);
+    console.log('[SwitchNetwork] ConnectorClient:', connectorClient);
+    console.log('[SwitchNetwork] switchChain function:', switchChain);
+
     try {
+      // First try to switch directly
+      console.log('[SwitchNetwork] Attempting switchChain...');
       await switchChain({ chainId: expectedChainId });
-    } catch (err) {
-      console.error('Failed to switch network:', err);
-      setError(t('payment.networkSwitchFailed'));
+      console.log('[SwitchNetwork] switchChain succeeded!');
+    } catch (switchError: unknown) {
+      console.error('[SwitchNetwork] switchChain failed:', switchError);
+      const err = switchError as { code?: number; message?: string };
+      console.log('[SwitchNetwork] Error code:', err.code);
+      console.log('[SwitchNetwork] Error message:', err.message);
+
+      // If chain is not added (error 4902), try to add it first
+      if (err.code === 4902 && connectorClient) {
+        console.log('[SwitchNetwork] Chain not found, attempting to add...');
+        try {
+          const addChainParams = {
+            chainId: `0x${expectedChainId.toString(16)}`,
+            chainName: network.name,
+            nativeCurrency: network.nativeCurrency,
+            rpcUrls: [network.rpcUrl],
+            blockExplorerUrls: [network.explorerUrl],
+          };
+          console.log('[SwitchNetwork] addEthereumChain params:', addChainParams);
+
+          await connectorClient.request({
+            method: 'wallet_addEthereumChain',
+            params: [addChainParams],
+          });
+          console.log('[SwitchNetwork] Chain added, attempting switch again...');
+          // After adding, the wallet should auto-switch, but try again just in case
+          await switchChain({ chainId: expectedChainId });
+          console.log('[SwitchNetwork] Switch after add succeeded!');
+        } catch (addError) {
+          console.error('[SwitchNetwork] Failed to add network:', addError);
+          setError(t('payment.networkSwitchFailed'));
+        }
+      } else {
+        console.error('[SwitchNetwork] Unhandled error, code:', err.code);
+        setError(t('payment.networkSwitchFailed'));
+      }
     }
   };
 
@@ -86,33 +152,48 @@ export function DirectPayment({ request, onSuccess, onCancel }: DirectPaymentPro
       return;
     }
 
-    setStatus('confirming');
+    setStatus('signing');
     setError(null);
 
     try {
-      const result = await executePayment(request, address);
+      // Step 1: User signs EIP-3009 authorization (no gas cost)
+      // Use passkey signing for passkey wallets, wagmi signing for external wallets
+      const signResult = isPasskeyWallet
+        ? await createPasskeyEIP3009Authorization(
+            address as `0x${string}`,
+            request.amount,
+            request.token,
+            request.network,
+            request.id
+          )
+        : await createEIP3009Authorization(
+            address as `0x${string}`,
+            request.amount,
+            request.token,
+            request.network,
+            request.id
+          );
 
-      if (!result.success) {
-        setError(result.error || t('payment.failed'));
+      if (!signResult.success || !signResult.payload) {
+        setError(signResult.error || t('payment.failed'));
         setStatus('error');
         return;
       }
 
-      setTxHash(result.txHash!);
-      setStatus('waiting');
+      // Step 2: Send to facilitator for execution (facilitator pays gas)
+      setStatus('processing');
 
-      // Wait for confirmation
-      const confirmed = await waitForTransaction(result.txHash!, request.network);
+      const settleResult = await settlePayment(signResult.payload);
 
-      if (confirmed) {
-        setStatus('success');
-        setTimeout(() => {
-          onSuccess(result.txHash!);
-        }, 2000);
-      } else {
-        setError(t('payment.confirmationFailed'));
+      if (!settleResult.success) {
+        setError(settleResult.error || t('payment.failed'));
         setStatus('error');
+        return;
       }
+
+      setTxHash(settleResult.transactionHash!);
+      setStatus('success');
+      // Don't auto-close - let user view transaction first
     } catch (err) {
       console.error('Payment failed:', err);
       setError(err instanceof Error ? err.message : t('payment.failed'));
@@ -134,12 +215,18 @@ export function DirectPayment({ request, onSuccess, onCancel }: DirectPaymentPro
             href={getTransactionUrl(txHash as `0x${string}`, request.network)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 text-sm"
+            className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 text-sm mb-6"
           >
             {t('payment.viewTransaction')}
             <ExternalLink className="w-4 h-4" />
           </a>
         )}
+        <button
+          onClick={() => onSuccess(txHash!)}
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl transition-colors mt-4"
+        >
+          {t('checkout.done')}
+        </button>
       </div>
     );
   }
@@ -150,13 +237,28 @@ export function DirectPayment({ request, onSuccess, onCancel }: DirectPaymentPro
       {address && (
         <div className="bg-gray-50 rounded-xl p-4 mb-6">
           <div className="flex items-center gap-3">
-            <WalletAvatar address={address} size={40} />
+            {isPasskeyWallet ? (
+              <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                <Fingerprint className="w-5 h-5 text-indigo-600" />
+              </div>
+            ) : (
+              <WalletAvatar address={address} size={40} />
+            )}
             <div className="flex-1">
               <p className="text-sm text-gray-500">{t('payment.payingFrom')}</p>
-              <p className="font-mono text-sm text-gray-900">
-                {address.slice(0, 6)}...{address.slice(-4)}
-              </p>
+              {isPasskeyWallet && passkeyUsername ? (
+                <p className="font-medium text-sm text-gray-900">{passkeyUsername}</p>
+              ) : (
+                <p className="font-mono text-sm text-gray-900">
+                  {address.slice(0, 6)}...{address.slice(-4)}
+                </p>
+              )}
             </div>
+            {isPasskeyWallet && (
+              <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
+                Passkey
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -223,8 +325,8 @@ export function DirectPayment({ request, onSuccess, onCancel }: DirectPaymentPro
         </div>
       )}
 
-      {/* Network Switch */}
-      {!isCorrectNetwork && (
+      {/* Network Switch - Only show for external wallets, not passkey wallets */}
+      {!isCorrectNetwork && !isPasskeyWallet && (
         <button
           onClick={handleSwitchNetwork}
           className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-xl mb-4 flex items-center justify-center gap-2 transition-colors"
@@ -240,16 +342,16 @@ export function DirectPayment({ request, onSuccess, onCancel }: DirectPaymentPro
         disabled={!isCorrectNetwork || !hasSufficientBalance || status !== 'idle'}
         className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
       >
-        {status === 'confirming' && (
+        {status === 'signing' && (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
-            {t('payment.confirmInWallet')}
+            {t('payment.signInWallet')}
           </>
         )}
-        {status === 'waiting' && (
+        {status === 'processing' && (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
-            {t('payment.waitingConfirmation')}
+            {t('payment.processing')}
           </>
         )}
         {(status === 'idle' || status === 'error') && (
@@ -263,7 +365,7 @@ export function DirectPayment({ request, onSuccess, onCancel }: DirectPaymentPro
       {/* Cancel */}
       <button
         onClick={onCancel}
-        disabled={status === 'confirming' || status === 'waiting'}
+        disabled={status === 'signing' || status === 'processing'}
         className="w-full text-gray-500 hover:text-gray-700 py-3 text-sm transition-colors disabled:opacity-50"
       >
         {t('common.cancel')}

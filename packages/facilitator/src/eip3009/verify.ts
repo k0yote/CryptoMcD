@@ -49,7 +49,7 @@ async function getTokenDomain(tokenAddress: Address, network: NetworkId) {
           },
         ],
         functionName: 'version',
-      }).catch(() => '2'), // Default to '2' if version() doesn't exist
+      }).catch(() => '1'), // Default to '1' if version() doesn't exist (must match client)
     ]);
 
     return {

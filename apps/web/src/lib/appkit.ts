@@ -1,6 +1,7 @@
 import { createAppKit } from '@reown/appkit/react';
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi';
-import { mainnet, polygon, base, avalanche } from '@reown/appkit/networks';
+import type { AppKitNetwork } from '@reown/appkit/networks';
+import { ReownAuthentication } from '@reown/appkit-siwx';
 
 // Get project ID from environment or use a demo one
 // Create your own at https://cloud.reown.com
@@ -14,8 +15,66 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/179229932'],
 };
 
-// Supported networks
-export const networks = [base, polygon, avalanche, mainnet];
+// Custom testnet chain definitions
+const sepolia: AppKitNetwork = {
+  id: 11155111,
+  name: 'Sepolia',
+  nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://ethereum-sepolia-rpc.publicnode.com'] },
+  },
+  blockExplorers: {
+    default: { name: 'Etherscan', url: 'https://sepolia.etherscan.io' },
+  },
+  testnet: true,
+};
+
+const baseSepolia: AppKitNetwork = {
+  id: 84532,
+  name: 'Base Sepolia',
+  nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://sepolia.base.org'] },
+  },
+  blockExplorers: {
+    default: { name: 'BaseScan', url: 'https://sepolia.basescan.org' },
+  },
+  testnet: true,
+};
+
+const polygonAmoy: AppKitNetwork = {
+  id: 80002,
+  name: 'Polygon Amoy',
+  nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://rpc-amoy.polygon.technology'] },
+  },
+  blockExplorers: {
+    default: { name: 'PolygonScan', url: 'https://amoy.polygonscan.com' },
+  },
+  testnet: true,
+};
+
+const avalancheFuji: AppKitNetwork = {
+  id: 43113,
+  name: 'Avalanche Fuji',
+  nativeCurrency: { name: 'Avalanche', symbol: 'AVAX', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://api.avax-test.network/ext/bc/C/rpc'] },
+  },
+  blockExplorers: {
+    default: { name: 'Snowtrace', url: 'https://testnet.snowtrace.io' },
+  },
+  testnet: true,
+};
+
+// Supported networks (testnets only)
+export const networks: [AppKitNetwork, ...AppKitNetwork[]] = [
+  baseSepolia,
+  sepolia,
+  polygonAmoy,
+  avalancheFuji,
+];
 
 // Create Wagmi adapter
 export const wagmiAdapter = new WagmiAdapter({
@@ -24,12 +83,13 @@ export const wagmiAdapter = new WagmiAdapter({
   ssr: false,
 });
 
-// Create AppKit instance with Smart Account support
+// Create AppKit instance with Smart Account support and SIWX authentication
 createAppKit({
   adapters: [wagmiAdapter],
   networks,
   projectId,
   metadata,
+  siwx: new ReownAuthentication(), // Enable SIWX authentication (chain-agnostic)
   features: {
     analytics: false,
     email: true,

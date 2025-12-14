@@ -37,15 +37,7 @@ interface PaymentRecord {
 }
 
 const products: Product[] = [
-  { id: '1', nameKey: 'products.bigMac', price: 5.99, image: '🍔' },
-  { id: '2', nameKey: 'products.quarterPounder', price: 6.49, image: '🍔' },
-  { id: '3', nameKey: 'products.mcChicken', price: 4.99, image: '🍗' },
-  { id: '4', nameKey: 'products.filetOFish', price: 5.49, image: '🐟' },
-  { id: '5', nameKey: 'products.mcDouble', price: 3.99, image: '🍔' },
-  { id: '6', nameKey: 'products.chickenMcNuggets', price: 5.99, image: '🍗' },
-  { id: '7', nameKey: 'products.frenchFries', price: 2.99, image: '🍟' },
-  { id: '8', nameKey: 'products.cocaCola', price: 1.99, image: '🥤' },
-  { id: '9', nameKey: 'products.mcFlurry', price: 3.49, image: '🍦' },
+  { id: '1', nameKey: 'products.bigMac', price: 0.006, image: '🍔' },
 ];
 
 export function SimpleLandingPage() {

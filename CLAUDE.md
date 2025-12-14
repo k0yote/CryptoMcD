@@ -99,6 +99,8 @@ cryptopay/
 | Package | Technology | Purpose |
 |---------|------------|---------|
 | apps/web | React 18 + Vite + Tailwind | Client UI |
+| apps/web | tempo.ts + ox | Passkey/WebAuthn P256 signing |
+| apps/web | Chainlink | JPY/USD price feed |
 | apps/server | Hono | x402 resource server |
 | packages/facilitator | Hono + viem | EIP-3009 execution |
 | packages/shared | TypeScript | Shared types/utils |
@@ -118,10 +120,63 @@ cryptopay/
 - Facilitator submits transaction and pays gas
 - Supported by USDC and JPYC contracts
 
+### Chainlink Price Feed (JPY/USD)
+- Real-time exchange rate from Chainlink oracle on Sepolia
+- Used for JPYC payment amount calculation
+- Contract: `0x8A6af2B75F23831ADc973ce6288e5329F63D86c6`
+- 1-minute cache with automatic refresh
+- Fallback rate if oracle unavailable
+
+**Related Files:**
+- `apps/web/src/lib/chainlink.ts` - Chainlink integration
+- `apps/web/src/hooks/useJpyRate.ts` - React hook for rate
+
 ### Passkey Wallet
 - WebAuthn P-256 keypair for wallet generation
 - ERC-4337 Smart Account compatible
 - No seed phrase - secured by device biometrics
+
+### Passkey Payment Flow (P256 + EIP-7951)
+
+Passkey wallets use P-256 curve (secp256r1) which is different from Ethereum's native secp256k1. This requires special handling:
+
+```
+┌─────────────────┐                      ┌─────────────────┐
+│  Client (web)   │                      │   Facilitator   │
+│                 │                      │                 │
+│ 1. User clicks  │                      │                 │
+│    "Pay"        │                      │                 │
+│                 │                      │                 │
+│ 2. Sign EIP-712 │                      │                 │
+│    with Passkey │                      │                 │
+│    (P256/WebAuthn)                     │                 │
+│                 │  3. Send payload     │                 │
+│                 │     with P256 sig    │                 │
+│                 │ ───────────────────► │                 │
+│                 │                      │ 4. Verify P256  │
+│                 │                      │    (off-chain   │
+│                 │                      │    or via       │
+│                 │                      │    EIP-7951)    │
+│                 │                      │                 │
+│                 │                      │ 5. Execute      │
+│                 │  6. Return tx hash   │    transfer     │
+│                 │ ◄─────────────────── │                 │
+└─────────────────┘                      └─────────────────┘
+```
+
+**Key Technical Details:**
+- **P256 vs secp256k1**: Token contracts (USDC/JPYC) use `ecrecover` which only verifies secp256k1 signatures. P256 signatures from passkeys can't be verified directly.
+- **EIP-7951 (Fusaka upgrade)**: Added P256VERIFY precompile at address `0x100` on Sepolia, enabling on-chain P256 verification.
+- **Tempo SDK**: Uses `tempo.ts` for WebAuthnP256 signing (`apps/web/src/lib/passkeySigner.ts`)
+- **Demo Mode**: For demo, facilitator executes transfers from its pre-funded account after verifying P256 signature.
+- **Production**: Would use ERC-4337 Smart Accounts that verify P256 signatures via the precompile.
+
+**Related Files:**
+- `apps/web/src/lib/passkeySigner.ts` - Tempo WebAuthnP256 integration
+- `apps/web/src/lib/eip3009.ts` - `createPasskeyEIP3009Authorization()` function
+- `apps/web/src/components/DirectPayment.tsx` - Passkey wallet detection and UI
+- `packages/facilitator/src/routes/settle.ts` - Passkey payment handling
+- `packages/facilitator/src/eip3009/transfer.ts` - `executePasskeyTransfer()` function
 
 ## Supported Networks & Tokens (Testnets Only)
 

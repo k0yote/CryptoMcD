@@ -81,7 +81,10 @@
     "paymentSuccessful": "Payment Successful!",
     "orderConfirmed": "Your order has been confirmed",
     "orderTotal": "Order Total",
-    "done": "Done"
+    "done": "Done",
+    "loadingRate": "Loading rate...",
+    "refreshRate": "Refresh rate",
+    "payButton": "Pay"
   },
   "paymentHistory": {
     "title": "Payment History",
@@ -151,6 +154,8 @@
     "requestExpired": "Payment request has expired",
     "confirmInWallet": "Confirm in wallet...",
     "waitingConfirmation": "Waiting for confirmation...",
+    "signInWallet": "Sign in wallet...",
+    "processing": "Processing payment...",
     "payNow": "Pay {{amount}} {{token}}",
     "success": "Payment Successful!",
     "successDescription": "Your payment has been confirmed on the blockchain",

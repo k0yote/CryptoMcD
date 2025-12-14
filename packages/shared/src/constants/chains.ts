@@ -19,7 +19,7 @@ export const SUPPORTED_NETWORKS = {
   sepolia: {
     chainId: 11155111,
     name: 'Sepolia',
-    rpcUrl: 'https://rpc.sepolia.org',
+    rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
     explorerUrl: 'https://sepolia.etherscan.io',
     color: '#627EEA',
     nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },

@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowLeft, CreditCard, CheckCircle2, QrCode, Wallet, Loader2 } from 'lucide-react';
+import { ArrowLeft, CreditCard, CheckCircle2, QrCode, Wallet, Loader2, RefreshCw } from 'lucide-react';
 import { useAccount, useSwitchChain, useChainId } from 'wagmi';
 import { PaymentQRCode } from './PaymentQRCode';
 import { DirectPayment } from './DirectPayment';
@@ -13,6 +13,8 @@ import {
   type NetworkId,
   type TokenSymbol,
 } from '@/lib/payment-config';
+import { useJpyRate } from '@/hooks/useJpyRate';
+import { getPasskeyWalletInfo } from '@/lib/passkeyWallet';
 
 interface CartItem {
   id: string;
@@ -39,11 +41,44 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
   const chainId = useChainId();
   const { switchChain, isPending: isSwitchingChain } = useSwitchChain();
 
+  // Chainlink JPY/USD rate
+  const { rate: jpyRate, isLoading: isRateLoading, isStale: isRateStale, refetch: refetchRate, convertUsdToJpy } = useJpyRate();
+
+  // Check for passkey wallet
+  const passkeyWalletInfo = useMemo(() => {
+    const savedMethod = localStorage.getItem('cryptopay_login_method');
+    if (savedMethod === 'passkey-wallet') {
+      return getPasskeyWalletInfo();
+    }
+    return null;
+  }, []);
+
   const [step, setStep] = useState<Step>('payment-method');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(null);
   const [network, setNetwork] = useState<NetworkId | null>(null);
   const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
   const [_txHash, setTxHash] = useState<string | null>(null);
+
+  // Format USD amount with appropriate decimal places
+  const formatUsd = useCallback((amount: number): string => {
+    if (amount < 0.01) {
+      return amount.toFixed(4).replace(/\.?0+$/, '');
+    }
+    return amount.toFixed(2);
+  }, []);
+
+  // Get token amount with real JPY rate for JPYC
+  const getTokenAmount = useCallback((usdAmount: number, token: TokenSymbol): string => {
+    if (token === 'JPYC' && convertUsdToJpy) {
+      const jpyAmount = convertUsdToJpy(usdAmount);
+      if (jpyAmount !== null) {
+        // Format with up to 2 decimal places, remove trailing zeros
+        return jpyAmount.toFixed(2).replace(/\.?0+$/, '');
+      }
+      return usdToTokenAmount(usdAmount, token);
+    }
+    return usdToTokenAmount(usdAmount, token);
+  }, [convertUsdToJpy]);
 
   // Get available networks for the selected token
   const availableNetworks = useMemo(
@@ -77,13 +112,19 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
     // If wallet is connected, try to switch chain
     if (isConnected) {
       const targetChainId = SUPPORTED_NETWORKS[net].chainId;
+      console.log('[NetworkSelect] Current chainId:', chainId, 'Target:', targetChainId);
+
       if (chainId !== targetChainId) {
         try {
+          console.log('[NetworkSelect] Switching chain...');
           await switchChain({ chainId: targetChainId });
+          console.log('[NetworkSelect] Chain switch completed');
         } catch (err) {
-          console.error('Failed to switch chain:', err);
+          console.error('[NetworkSelect] Failed to switch chain:', err);
           // Still allow selection even if switch fails
         }
+      } else {
+        console.log('[NetworkSelect] Already on correct chain');
       }
     }
   };
@@ -98,8 +139,8 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
   const handlePaymentFlowSelect = (flow: PaymentFlow) => {
     if (!paymentMethod || paymentMethod === 'Stripe' || !network) return;
 
-    // Create payment request
-    const tokenAmount = usdToTokenAmount(total, paymentMethod);
+    // Create payment request with real JPY rate for JPYC
+    const tokenAmount = getTokenAmount(total, paymentMethod);
     const request = createPaymentRequest(
       tokenAmount,
       paymentMethod,
@@ -117,7 +158,10 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
 
   const handlePaymentSuccess = (hash: string) => {
     setTxHash(hash);
-    setStep('success');
+    // Save to history immediately when payment succeeds
+    if (paymentMethod && paymentMethod !== 'Stripe') {
+      onComplete(paymentMethod, network ?? undefined);
+    }
   };
 
   const handleComplete = () => {
@@ -258,20 +302,50 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
                       {item.name} x{item.quantity}
                     </span>
                   </div>
-                  <span className="text-gray-900">${(item.price * item.quantity).toFixed(2)}</span>
+                  <span className="text-gray-900">${formatUsd(item.price * item.quantity)}</span>
                 </div>
               ))}
             </div>
             <div className="border-t border-gray-200 pt-4 mb-6">
               <div className="flex justify-between">
                 <span className="font-medium text-gray-900">{t('common.total')}</span>
-                <span className="text-xl font-semibold text-gray-900">${total.toFixed(2)}</span>
+                <span className="text-xl font-semibold text-gray-900">${formatUsd(total)}</span>
               </div>
               {paymentMethod && paymentMethod !== 'Stripe' && (
-                <div className="flex justify-between mt-2 text-sm text-gray-500">
-                  <span>
-                    ≈ {usdToTokenAmount(total, paymentMethod)} {paymentMethod}
-                  </span>
+                <div className="mt-2 text-sm text-gray-500">
+                  <div className="flex justify-between">
+                    <span>≈</span>
+                    <span className="font-medium">
+                      {isRateLoading && paymentMethod === 'JPYC' ? (
+                        <span className="inline-flex items-center gap-1">
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          {t('checkout.loadingRate')}
+                        </span>
+                      ) : (
+                        `${getTokenAmount(total, paymentMethod)} ${paymentMethod}`
+                      )}
+                    </span>
+                  </div>
+                  {/* Show Chainlink rate for JPYC */}
+                  {paymentMethod === 'JPYC' && jpyRate && (
+                    <div className="flex items-center justify-between mt-1 text-xs text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <span>1 USD = {jpyRate.toFixed(2)} JPY</span>
+                        {isRateStale && <span className="text-yellow-500">(stale)</span>}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            refetchRate();
+                          }}
+                          className="p-0.5 hover:bg-gray-100 rounded"
+                          title={t('checkout.refreshRate')}
+                        >
+                          <RefreshCw className={`w-3 h-3 ${isRateLoading ? 'animate-spin' : ''}`} />
+                        </button>
+                      </div>
+                      <span className="text-indigo-500">via Chainlink</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -289,10 +363,7 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
                     {t('payment.switchingNetwork')}
                   </>
                 ) : (
-                  t('checkout.payWithCrypto', {
-                    amount: `$${total.toFixed(2)}`,
-                    currency: paymentMethod,
-                  })
+                  `${getTokenAmount(total, paymentMethod)} ${paymentMethod} ${t('checkout.payButton')}`
                 )}
               </button>
             )}
@@ -318,10 +389,16 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
           <h1 className="text-2xl font-bold mb-2 text-gray-900">
             {t('payment.selectPaymentFlow')}
           </h1>
-          <p className="text-gray-600 mb-8">
-            {t('common.total')}: ${total.toFixed(2)} (
-            {usdToTokenAmount(total, paymentMethod as TokenSymbol)} {paymentMethod})
+          <p className="text-gray-600 mb-4">
+            {t('common.total')}: ${formatUsd(total)} (
+            {getTokenAmount(total, paymentMethod as TokenSymbol)} {paymentMethod})
           </p>
+          {paymentMethod === 'JPYC' && jpyRate && (
+            <p className="text-xs text-gray-400 mb-8 flex items-center gap-2">
+              <span>1 USD = {jpyRate.toFixed(2)} JPY</span>
+              <span className="text-indigo-500">via Chainlink</span>
+            </p>
+          )}
 
           <div className="space-y-4">
             {/* Direct Payment Option */}
@@ -393,6 +470,8 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
               request={paymentRequest}
               onSuccess={handlePaymentSuccess}
               onCancel={() => setStep('payment-flow')}
+              passkeyAddress={passkeyWalletInfo?.address}
+              passkeyUsername={passkeyWalletInfo?.username}
             />
           </div>
         </div>
@@ -434,7 +513,7 @@ export function SimpleCheckout({ items, total, onBack, onComplete }: SimpleCheck
 
           <div className="bg-gray-50 rounded-xl p-4 mb-6">
             <div className="text-sm text-gray-600 mb-2">{t('checkout.orderTotal')}</div>
-            <div className="text-2xl font-semibold text-gray-900">${total.toFixed(2)}</div>
+            <div className="text-2xl font-semibold text-gray-900">${formatUsd(total)}</div>
           </div>
 
           <button

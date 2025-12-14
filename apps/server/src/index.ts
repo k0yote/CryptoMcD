@@ -5,6 +5,7 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import products from './routes/products';
 import stripe from './routes/stripe';
+import auth from './routes/auth';
 
 const app = new Hono();
 
@@ -16,6 +17,7 @@ app.use(
     origin: ['http://localhost:3000', 'http://localhost:3002', 'http://localhost:5173'],
     allowHeaders: ['Content-Type', 'X-PAYMENT-SIGNATURE', 'X-Order-Total'],
     exposeHeaders: ['X-PAYMENT-REQUIRED'],
+    credentials: true, // Allow cookies for SIWE authentication
   })
 );
 
@@ -25,6 +27,7 @@ app.get('/health', (c) => c.json({ status: 'ok' }));
 // Routes
 app.route('/products', products);
 app.route('/api/stripe', stripe);
+app.route('/api/auth', auth);
 
 // 404 handler
 app.notFound((c) => c.json({ error: 'Not Found' }, 404));
