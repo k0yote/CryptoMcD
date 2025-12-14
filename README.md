@@ -94,7 +94,15 @@ Create `.env` files in each package:
 ```env
 VITE_REOWN_PROJECT_ID=your_project_id
 VITE_API_URL=http://localhost:3001
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
 VITE_STORE_ADDRESS=0x...
+```
+
+**apps/server/.env**
+```env
+# Stripe (get keys from https://dashboard.stripe.com/test/apikeys)
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...  # Optional, for webhook verification
 ```
 
 **packages/facilitator/.env**

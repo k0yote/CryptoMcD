@@ -12,7 +12,9 @@
   "dependencies": {
     "@cryptopay/shared": "workspace:*",
     "@hono/node-server": "^1.13.7",
-    "hono": "^4.6.12"
+    "dotenv": "^17.2.3",
+    "hono": "^4.6.12",
+    "stripe": "^20.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

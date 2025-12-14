@@ -75,20 +75,10 @@ export async function createCheckoutSession(
 }
 
 /**
- * Redirect to Stripe Checkout
+ * Redirect to Stripe Checkout URL
  */
-export async function redirectToCheckout(sessionId: string): Promise<void> {
-  const stripe = await getStripe();
-
-  if (!stripe) {
-    throw new Error('Stripe not initialized');
-  }
-
-  const { error } = await stripe.redirectToCheckout({ sessionId });
-
-  if (error) {
-    throw new Error(error.message || 'Failed to redirect to checkout');
-  }
+export function redirectToCheckout(url: string): void {
+  window.location.href = url;
 }
 
 /**
@@ -107,7 +97,11 @@ export async function initiateStripeCheckout(
     cancelUrl: cancelUrl || `${baseUrl}?payment=cancelled`,
   });
 
-  await redirectToCheckout(session.sessionId);
+  if (!session.url) {
+    throw new Error('No checkout URL returned from Stripe');
+  }
+
+  redirectToCheckout(session.url);
 }
 
 /**

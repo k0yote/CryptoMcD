@@ -10,7 +10,10 @@
     "typecheck": "turbo run typecheck",
     "dev:web": "turbo run dev --filter=@cryptopay/web",
     "dev:server": "turbo run dev --filter=@cryptopay/server",
-    "dev:facilitator": "turbo run dev --filter=@cryptopay/facilitator"
+    "dev:facilitator": "turbo run dev --filter=@cryptopay/facilitator",
+    "stop": "pkill -f 'tsx watch' 2>/dev/null; pkill -f 'vite' 2>/dev/null; lsof -ti:3000,3001,3003 | xargs kill -9 2>/dev/null; echo 'All services stopped'",
+    "restart": "pnpm stop && sleep 1 && pnpm dev",
+    "status": "scripts/status.sh"
   },
   "devDependencies": {
     "turbo": "^2.3.3",

@@ -1,8 +1,10 @@
+import 'dotenv/config';
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import products from './routes/products';
+import stripe from './routes/stripe';
 
 const app = new Hono();
 
@@ -22,6 +24,7 @@ app.get('/health', (c) => c.json({ status: 'ok' }));
 
 // Routes
 app.route('/products', products);
+app.route('/api/stripe', stripe);
 
 // 404 handler
 app.notFound((c) => c.json({ error: 'Not Found' }, 404));
